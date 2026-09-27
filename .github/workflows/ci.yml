@@ -111,6 +111,7 @@ jobs:
             apps/web/dist
             apps/web/dist-ext
             extension/dist/chromium
+            extension/dist/e2e-chromium
           retention-days: 3
 
   e2e:
