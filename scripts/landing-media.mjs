@@ -174,11 +174,14 @@ function variant(base, { mode, theme, scene } = {}) {
 
 // ------------------------------------------------------------ preview server
 async function startServer() {
-  // detached puts the server in its own process group, so we can stop exactly it and its children
-  const child = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], {
+  // On Windows npx is npx.cmd; on Unix it's just npx.
+  const npxCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx'
+  const child = spawn(npxCmd, ['vite', 'preview', '--port', String(PORT), '--strictPort'], {
     cwd: WEB,
-    detached: true,
+    // detached only works for process-group kill on Unix; skip on Windows
+    detached: process.platform !== 'win32',
     stdio: 'ignore',
+    shell: process.platform === 'win32',
   })
   for (let i = 0; i < 60; i++) {
     try {
@@ -192,7 +195,12 @@ async function startServer() {
 }
 function stopServer(child) {
   try {
-    process.kill(-child.pid, 'SIGTERM')
+    if (process.platform === 'win32') {
+      // taskkill /T kills the whole child tree on Windows
+      execSync(`taskkill /PID ${child.pid} /T /F`, { stdio: 'ignore' })
+    } else {
+      process.kill(-child.pid, 'SIGTERM')
+    }
   } catch {}
 }
 
