@@ -1,4 +1,4 @@
-﻿package hosts
+package hosts
 
 import (
 	"os"

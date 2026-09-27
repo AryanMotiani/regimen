@@ -1,4 +1,4 @@
-﻿// Package cli is the regimen-agent command line. Running it with no
+// Package cli is the regimen-agent command line. Running it with no
 // arguments (a double click) does the natural thing: install when it is not
 // installed, open a fresh pairing link when it is not connected yet, and show
 // the status otherwise.

@@ -1,4 +1,4 @@
-﻿// Package paths knows where the agent keeps its program and data, and reads and
+// Package paths knows where the agent keeps its program and data, and reads and
 // writes the small JSON files in the data folder.
 package paths
 

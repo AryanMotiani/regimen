@@ -1,4 +1,4 @@
-﻿// Package buildinfo holds values that release builds set with -ldflags:
+// Package buildinfo holds values that release builds set with -ldflags:
 //
 //	go build -ldflags "-X regimen/agent/internal/buildinfo.Version=1.2.0 \
 //	  -X regimen/agent/internal/buildinfo.AppURL=https://example.github.io/regimen/"

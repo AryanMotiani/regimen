@@ -1,4 +1,4 @@
-﻿// Package hosts is the hosts-file layer. Regimen only ever touches the lines
+// Package hosts is the hosts-file layer. Regimen only ever touches the lines
 // between its markers, writes atomically (temp file and rename) so a crash can't
 // leave a half-written file, and never edits anything else in the file.
 package hosts
