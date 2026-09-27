@@ -5,6 +5,7 @@ dist-ext
 .DS_Store
 test-results
 playwright-report
+test-builds
 *.tar.gz
 .env
 agent/dist

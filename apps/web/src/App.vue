@@ -67,9 +67,7 @@ const showRail = computed(() => !['/today', '/tasks', '/habits'].includes(route.
       <div class="text-center">
         <img :src="logo" alt="" class="mx-auto h-12 w-12" />
         <h1 class="mt-3 text-xl font-semibold">Approve this site in the extension</h1>
-        <p class="mt-1.5 text-sm text-muted">
-          The Regimen extension is installed. Two quick steps let this site use it to block sites.
-        </p>
+        <p class="mt-1.5 text-sm text-muted">The Regimen extension is installed. Two quick steps let this site use it to block sites.</p>
       </div>
       <div class="mt-4">
         <ApproveGuide />

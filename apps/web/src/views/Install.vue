@@ -304,8 +304,8 @@ const agentPaired = computed(() => !!store.state?.agent?.paired)
       <template v-if="!extensionReady">
         <div v-if="browser === 'safari'" class="mt-4 text-sm">
           <p>
-            Safari does not run the Regimen extension. Install the <b>lock agent</b> in step 2: it blocks in Safari and every other
-            app. Using another browser too? Open this page there.
+            Safari does not run the Regimen extension. Install the <b>lock agent</b> in step 2: it blocks in Safari and every other app.
+            Using another browser too? Open this page there.
           </p>
         </div>
 
@@ -408,8 +408,8 @@ const agentPaired = computed(() => !!store.state?.agent?.paired)
           <li><a :href="RELEASES_URL" target="_blank" rel="noopener" class="text-accent underline">All files of the latest release</a></li>
         </ul>
         <p class="mt-3 text-muted">
-          Want the extensions page and developer tools locked too? Run <code>regimen-agent install --strict</code> as admin. Remove it
-          with <code>regimen-agent uninstall</code> (refused while a no-failsafe block is running).
+          Want the extensions page and developer tools locked too? Run <code>regimen-agent install --strict</code> as admin. Remove it with
+          <code>regimen-agent uninstall</code> (refused while a no-failsafe block is running).
         </p>
       </details>
 

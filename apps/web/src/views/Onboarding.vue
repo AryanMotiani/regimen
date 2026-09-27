@@ -271,8 +271,8 @@ const firstRule = computed(() => s.value.rules[0])
           >
             <Icon name="terminal" class="text-accent" /><span
               ><b>If something breaks</b> (sites stay blocked after the lock agent crashed): run
-              <code class="rounded bg-sunk px-1">regimen-agent recover</code>, or open <b>TROUBLESHOOTING.md</b> in the install folder.
-              The recovery tool refuses to run while the agent is healthy, so it can't be used as a shortcut.</span
+              <code class="rounded bg-sunk px-1">regimen-agent recover</code>, or open <b>TROUBLESHOOTING.md</b> in the install folder. The
+              recovery tool refuses to run while the agent is healthy, so it can't be used as a shortcut.</span
             >
           </button>
           <button

@@ -58,6 +58,5 @@ router.beforeEach((to) => {
 })
 
 router.afterEach((to) => {
-  document.title =
-    to.meta.title && to.meta.title !== 'Regimen' ? `${to.meta.title} · Regimen` : 'Regimen: study without the scroll'
+  document.title = to.meta.title && to.meta.title !== 'Regimen' ? `${to.meta.title} · Regimen` : 'Regimen: study without the scroll'
 })

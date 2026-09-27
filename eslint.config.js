@@ -3,7 +3,9 @@ import vue from 'eslint-plugin-vue'
 import globals from 'globals'
 
 export default [
-  { ignores: ['**/dist/**', '**/dist-ext/**', 'node_modules/**', '.agents/**', 'test-results/**', 'playwright-report/**'] },
+  {
+    ignores: ['**/dist/**', '**/dist-ext/**', 'node_modules/**', '.agents/**', 'test-results/**', 'playwright-report/**', 'test-builds/**'],
+  },
   js.configs.recommended,
   ...vue.configs['flat/essential'],
   {

@@ -907,8 +907,7 @@ export function createBackend({ storage, now = () => Date.now(), hashIterations,
       if (s.security.pin) await checkPin(s, pin)
       if (anyLockedLive(s)) fail('LOCKED', 'A no-failsafe rule is active. Import after it ends.')
       const payload = data?.data || data
-      if (!payload || typeof payload !== 'object' || !Array.isArray(payload.tasks))
-        fail('VALIDATION', 'That file is not a Regimen export.')
+      if (!payload || typeof payload !== 'object' || !Array.isArray(payload.tasks)) fail('VALIDATION', 'That file is not a Regimen export.')
       const next = sanitizeIncoming(payload, { security: s.security, agent: s.agent, onboarding: s.onboarding })
       next.ui = unionUi(s.ui, payload.ui)
       Object.keys(s).forEach((k) => delete s[k])

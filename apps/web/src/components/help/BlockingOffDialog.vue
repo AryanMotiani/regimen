@@ -41,26 +41,26 @@ async function grant() {
       <div class="flex items-start gap-3 rounded-xl border-2 border-bad bg-bad-soft p-4 text-ink">
         <Icon name="alert" :size="22" class="mt-0.5 shrink-0 text-bad" />
         <p v-if="guard.issue === 'no-extension'">
-          <b class="text-bad">Nothing will be blocked.</b> Regimen blocks sites with its free browser extension, and it is not
-          installed in {{ name }}. YouTube, Reddit and every other site still open.
+          <b class="text-bad">Nothing will be blocked.</b> Regimen blocks sites with its free browser extension, and it is not installed in
+          {{ name }}. YouTube, Reddit and every other site still open.
           <template v-if="guard.context === 'focus'">The timer still runs, so you can focus without blocking.</template>
           <template v-else>The timer, tasks and the study room work without it.</template>
         </p>
         <p v-else-if="guard.issue === 'not-approved'">
-          <b class="text-bad">Nothing will be blocked yet.</b> The Regimen extension is installed, but this website is not connected to
-          it, so it is running on its own and blocks nothing.
+          <b class="text-bad">Nothing will be blocked yet.</b> The Regimen extension is installed, but this website is not connected to it,
+          so it is running on its own and blocks nothing.
         </p>
         <p v-else>
-          <b class="text-bad">Nothing will be blocked yet.</b> {{ name }} has not given Regimen access to websites, so it can not stop
-          them from loading.
+          <b class="text-bad">Nothing will be blocked yet.</b> {{ name }} has not given Regimen access to websites, so it can not stop them
+          from loading.
         </p>
       </div>
 
       <!-- how to fix it -->
       <template v-if="guard.issue === 'no-extension'">
         <p v-if="browser === 'safari'">
-          Safari can not run the extension. Open Regimen in Chrome, Edge, Brave or Firefox, or install the lock agent from the Install
-          page, which blocks in every browser on your computer.
+          Safari can not run the extension. Open Regimen in Chrome, Edge, Brave or Firefox, or install the lock agent from the Install page,
+          which blocks in every browser on your computer.
         </p>
         <p v-else-if="browser === 'phone'" data-phone-note>{{ PHONE_NOTE }}</p>
         <ol v-else-if="manual" class="list-decimal space-y-1 pl-5 text-muted">

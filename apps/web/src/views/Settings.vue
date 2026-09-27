@@ -144,8 +144,7 @@ async function revoke(o) {
     <section v-if="localData" class="card border-accent p-5">
       <h2 class="font-semibold">Data found from before the extension</h2>
       <p class="mt-1 text-sm text-muted">
-        You used Regimen in this browser without the extension. Move those tasks, rules and habits into the extension so they are
-        enforced.
+        You used Regimen in this browser without the extension. Move those tasks, rules and habits into the extension so they are enforced.
       </p>
       <div class="mt-3 flex gap-2">
         <button class="btn btn-primary" @click="moveLocal">Move my data</button

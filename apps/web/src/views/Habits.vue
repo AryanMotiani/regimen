@@ -1,17 +1,6 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
-import {
-  addDays,
-  startOfDay,
-  dateKey,
-  isHabitDue,
-  isHabitDone,
-  habitStreak,
-  habitRate,
-  habitBestStreak,
-  yearGrid,
-  XP,
-} from '@regimen/core'
+import { addDays, startOfDay, dateKey, isHabitDue, isHabitDone, habitStreak, habitRate, habitBestStreak, yearGrid, XP } from '@regimen/core'
 import { store, call, attempt } from '../lib/store.js'
 import { askYesNo } from '../lib/dialogs.js'
 import { DAY_NAMES, daysLabel } from '../lib/format.js'

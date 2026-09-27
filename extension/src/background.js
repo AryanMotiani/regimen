@@ -249,8 +249,7 @@ ext.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         return { ok: true }
       }
       if (msg.action === 'origins') return { ok: true, data: await approvedOrigins() }
-      if (msg.action === 'pending')
-        return { ok: true, data: (await ext.storage.session.get('r_pending_origins')).r_pending_origins || [] }
+      if (msg.action === 'pending') return { ok: true, data: (await ext.storage.session.get('r_pending_origins')).r_pending_origins || [] }
       if (msg.action === 'bundles') return { ok: true, data: BUNDLES }
       if (msg.action === 'permissions') {
         const incognito = await ext.extension.isAllowedIncognitoAccess?.().catch?.(() => null)
@@ -267,8 +266,7 @@ ext.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         if (!approved) await requestApproval(origin)
         return { ok: true, data: { approved, version: ext.runtime.getManifest().version, hostAccess: await hasHostAccess() } }
       }
-      if (!approved)
-        return { ok: false, error: { code: 'NOT_APPROVED', message: 'Approve this site in the Regimen extension first.' } }
+      if (!approved) return { ok: false, error: { code: 'NOT_APPROVED', message: 'Approve this site in the Regimen extension first.' } }
       return runCommand(msg.cmd, msg.payload)
     }
     return { ok: false, error: { code: 'FORBIDDEN', message: 'Unknown sender.' } }
