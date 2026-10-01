@@ -51,7 +51,7 @@ jobs:
         working-directory: agent
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with: { go-version-file: agent/go.mod, cache: false }
       - name: gofmt
         if: runner.os == 'Linux'
@@ -66,7 +66,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with: { node-version-file: .nvmrc }
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with: { go-version-file: agent/go.mod, cache: false }
       - name: Vet every target OS
         working-directory: agent
@@ -122,7 +122,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with: { node-version-file: .nvmrc, cache: npm }
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with: { go-version-file: agent/go.mod, cache: false }
       - run: npm ci
       - uses: actions/download-artifact@v4

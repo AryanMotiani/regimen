@@ -26,7 +26,7 @@ jobs:
             build-mode: manual
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         if: matrix.language == 'go'
         with: { go-version-file: agent/go.mod, cache: false }
       - uses: github/codeql-action/init@v3
