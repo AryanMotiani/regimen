@@ -125,7 +125,7 @@ jobs:
       - uses: actions/setup-go@v5
         with: { go-version-file: agent/go.mod, cache: false }
       - run: npm ci
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with: { name: build-output }
       - name: Build the lock agent for the pairing test
         run: npm run agent:build -- --target linux/amd64
