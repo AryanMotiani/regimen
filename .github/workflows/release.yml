@@ -17,9 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with: { node-version-file: .nvmrc, cache: npm }
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with: { go-version-file: agent/go.mod, cache: false }
       - run: npm ci
       - name: Tag must match package.json version
@@ -64,7 +64,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with: { name: darwin-binaries, path: agent/dist }
       - name: Universal .pkg (unsigned)
         run: sh packaging/macos/build-pkg.sh "${GITHUB_REF_NAME#v}"
@@ -95,9 +95,9 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with: { name: release-files, path: release }
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with: { name: macos-pkg, path: release }
       - name: Checksums
         working-directory: release
@@ -129,7 +129,7 @@ jobs:
     steps:
       - if: env.CWS_EXTENSION_ID == ''
         run: echo "Chrome Web Store secrets not set, skipping."
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         if: env.CWS_EXTENSION_ID != ''
         with: { name: extension-zips }
       - if: env.CWS_EXTENSION_ID != ''
@@ -150,12 +150,12 @@ jobs:
         run: echo "addons.mozilla.org secrets not set, skipping."
       - uses: actions/checkout@v7
         if: env.AMO_JWT_ISSUER != ''
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: env.AMO_JWT_ISSUER != ''
         with: { node-version-file: .nvmrc, cache: npm }
       - if: env.AMO_JWT_ISSUER != ''
         run: npm ci && npm run build
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         if: env.AMO_JWT_ISSUER != ''
         with: { name: extension-zips, path: store }
       # The extension bundles minified code, so AMO needs the source (docs/store/AMO_REVIEWER_NOTES.md).
@@ -176,7 +176,7 @@ jobs:
     steps:
       - if: env.EDGE_PRODUCT_ID == ''
         run: echo "Edge Add-ons secrets not set, skipping."
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         if: env.EDGE_PRODUCT_ID != ''
         with: { name: extension-zips }
       # Edge Add-ons API v1.1: upload the package to the draft, wait, then submit.

@@ -7,10 +7,14 @@ updates:
     groups:
       dev-tooling:
         dependency-type: development
-        update-types: [minor, patch]
+        update-types: [minor, patch, major]
       runtime:
         dependency-type: production
         update-types: [minor, patch]
+  # All GitHub Actions updates arrive together as one pull request a month, not one each.
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: monthly }
+    groups:
+      actions:
+        patterns: ['*']
