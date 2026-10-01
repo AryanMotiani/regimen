@@ -1,4 +1,4 @@
-﻿#!/bin/sh
+#!/bin/sh
 # Regimen lock agent installer for Linux and macOS.
 #
 #   curl -fsSL https://github.com/AryanMotiani/regimen/releases/latest/download/install.sh | sh

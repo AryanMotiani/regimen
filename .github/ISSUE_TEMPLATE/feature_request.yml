@@ -2,6 +2,9 @@ name: Feature request
 description: Suggest an idea or improvement
 labels: [enhancement]
 body:
+  - type: markdown
+    attributes:
+      value: Check the [roadmap](https://github.com/AryanMotiani/regimen/blob/master/docs/ROADMAP.md) first, your idea may already be there. Comment on it or link it below.
   - type: textarea
     id: problem
     attributes:

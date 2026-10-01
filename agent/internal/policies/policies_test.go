@@ -132,3 +132,54 @@ func TestBackupAndWriteRefusesLinksAndKeepsPrivateBackups(t *testing.T) {
 		t.Fatal("a world-writable folder must be refused")
 	}
 }
+
+// An agent from before the rename to Regimen (FocusGateway, up to v1.2.0)
+// backed up the original policy file as <file>.focusgateway-backup. After an
+// upgrade that backup must still be the one uninstall restores, never our own
+// old policy file.
+func TestLegacyFocusGatewayBackupIsAdopted(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Unix modes")
+	}
+	t.Setenv("REGIMEN_DATA", t.TempDir())
+	dir := filepath.Join(t.TempDir(), "managed")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	_ = os.Chmod(dir, 0o755)
+	f := filepath.Join(dir, "policies.json")
+	original := `{"policies":{"Homepage":{"URL":"https://example.org"}}}`
+	oldOurs := `{"policies":{"DisablePrivateBrowsing":true}}`
+	if err := os.WriteFile(f+legacyBackupSuffix, []byte(original), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(f, []byte(oldOurs), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := backupAndWrite(f, []byte("new")); err != nil {
+		t.Fatal(err)
+	}
+	if exists(f + legacyBackupSuffix) {
+		t.Fatal("the old backup is renamed, not left behind")
+	}
+	if b, _ := os.ReadFile(f + backupSuffix); string(b) != original {
+		t.Fatalf("the backup must stay the original file, got %q", b)
+	}
+	if err := restoreOrRemove(f); err != nil {
+		t.Fatal(err)
+	}
+	if b, _ := os.ReadFile(f); string(b) != original {
+		t.Fatalf("uninstall must restore the original, got %q", b)
+	}
+
+	// Uninstall right after the upgrade, before any new write, restores it too.
+	g := filepath.Join(dir, "com.google.Chrome.plist")
+	_ = os.WriteFile(g+legacyBackupSuffix, []byte("theirs"), 0o600)
+	_ = os.WriteFile(g, []byte("ours"), 0o644)
+	if err := restoreOrRemove(g); err != nil {
+		t.Fatal(err)
+	}
+	if b, _ := os.ReadFile(g); string(b) != "theirs" || exists(g+legacyBackupSuffix) || exists(g+backupSuffix) {
+		t.Fatalf("restore from the old backup: %q", b)
+	}
+}

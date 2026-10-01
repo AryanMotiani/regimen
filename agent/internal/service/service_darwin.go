@@ -75,3 +75,30 @@ func Installed() bool {
 
 // RecoveryHint is where people find the emergency recovery tool.
 const RecoveryHint = "Applications, Regimen Emergency Recovery"
+
+// What the agent registered before the rename from FocusGateway (up to v1.2.0).
+const (
+	legacyLaunchd     = "/Library/LaunchDaemons/app.focusgateway.agent.plist"
+	legacyRecoveryCmd = "/Applications/FocusGateway Emergency Recovery.command"
+	legacyCliLink     = "/usr/local/bin/focusgateway-agent"
+)
+
+// LegacyInstalled reports whether an old FocusGateway agent is registered.
+func LegacyInstalled() bool {
+	_, err := os.Stat(legacyLaunchd)
+	return err == nil
+}
+
+// RemoveLegacy unloads and removes an old FocusGateway LaunchDaemon, its
+// helpers, its program folder and its installer receipt. Its data folder is
+// moved separately (paths.MigrateLegacyData).
+func RemoveLegacy() {
+	_ = platform.Run("launchctl", "bootout", "system", legacyLaunchd)
+	_ = os.Remove(legacyLaunchd)
+	_ = os.Remove(legacyRecoveryCmd)
+	if t, err := os.Readlink(legacyCliLink); err == nil && filepath.Base(t) == paths.LegacyBinaryName() {
+		_ = os.Remove(legacyCliLink)
+	}
+	_ = os.RemoveAll(paths.LegacyProgramDir())
+	_ = platform.Run("pkgutil", "--forget", "app.focusgateway.agent")
+}

@@ -1,6 +1,6 @@
 # Regimen developer guide
 
-How Regimen is built, how blocking is computed, and how to add the things people ask for most. For using the app, see the [user guide](USER-GUIDE.md).
+How Regimen is built, how blocking is computed, and how to add the things people ask for most. For the full map of the codebase (diagrams, storage, the lock agent, CI/CD and "where to change what") read [ARCHITECTURE.md](ARCHITECTURE.md) first. For using the app, see the [user guide](USER-GUIDE.md).
 
 ## Architecture
 
@@ -104,7 +104,7 @@ Sites become domains with `domainsForSites()`. `declarativeNetRequest` `requestD
 ### Tours and help
 
 - A tour is a list of steps in `TOURS` (`src/lib/tour.js`). Each step has a CSS `target` (usually a `data-tour="..."` attribute on the element), a `title` and one or two sentences of `text`. Steps whose target is missing or hidden are skipped. `desktop: true` hides a step on phones.
-- `TourHost.vue` shows a page's tour once, the first time the page opens after setup, and never while a dialog is open. Seen tours are kept in `localStorage['regimen:tours-seen']` (`"*"` marks all as seen, handy in tests).
+- `TourHost.vue` shows a page's tour once, the first time the page opens after setup, and never while a dialog is open. Seen tours are saved in `state.ui` and mirrored to `localStorage['regimen:tours-seen']` (`"*"` marks all as seen, handy in tests).
 - The help drawer text lives in `src/components/help/helpContent.js`, keyed by page id (`pageFor(path)`). Add a `<HelpButton page="..." />` to a new page's header.
 - Copy style: friendly and short, no em dashes, few semicolons.
 
@@ -134,6 +134,10 @@ Badges are data: add a line (or a tier) to `MILESTONES` in `packages/core/src/mi
 
 Add an entry to `packages/core/src/bundles.js` (id, name, category, domains) and run `npm run agent:bundles` so the agent's copy matches.
 
+### Add a storage key
+
+Use the `regimen:` prefix in the web app's `localStorage` and the `r_` prefix in the extension's storage. Never rename an existing key (or an agent file, folder or service name) without a migration, or people lose their data on update. The FocusGateway rename shows how: `apps/web/src/lib/legacy.js`, `extension/src/legacy.js` and `migrateLegacy()` in the agent, see [ARCHITECTURE.md](ARCHITECTURE.md#migrations).
+
 ### Add a backend command
 
 Add a handler to `handlers` in `backend.js`. If it can change blocking, leave it out of `PASSIVE` in `extension/src/background.js`, so the rules are rebuilt right after it runs. Add a unit test in `packages/core/test`.
@@ -157,4 +161,4 @@ End-to-end tests (`tests/e2e`) load `extension/dist/chromium` into a persistent 
 2. Push a tag `vX.Y.Z`. `.github/workflows/release.yml` runs the checks, builds the extension zips, the agent for six platforms and the installers, and publishes a GitHub Release with stable file names (`regimen-chromium.zip`, `regimen-firefox.zip`, ...), which the Install page links to.
 3. Merging to `master` deploys the website (`pages.yml`). Release the extension soon after website changes that need new extension commands, and check that the Install page downloads work.
 
-See [MAINTAINER_SETUP.md](MAINTAINER_SETUP.md) for store publishing and secrets.
+See [RELEASING.md](RELEASING.md) for the full checklist, store publishing and secrets.

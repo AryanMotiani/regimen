@@ -253,6 +253,27 @@ func exists(p string) bool {
 // backupSuffix marks the copy of a policy file that was there before us.
 const backupSuffix = ".regimen-backup"
 
+// legacyBackupSuffix is the backup name used before the rename from
+// FocusGateway to Regimen (up to v1.2.0).
+const legacyBackupSuffix = ".focusgateway-backup"
+
+// adoptLegacyBackup renames a backup an earlier FocusGateway version made of
+// f to the current backup name. Without this an upgrade would back up our own
+// old policy file as if it were the original, and uninstall would then restore
+// it, leaving Secure DNS and private windows switched off for good. Links are
+// never followed.
+func adoptLegacyBackup(f string) error {
+	old, bak := f+legacyBackupSuffix, f+backupSuffix
+	st, err := os.Lstat(old)
+	if err != nil || !st.Mode().IsRegular() {
+		return nil // nothing to adopt (or a link we leave alone)
+	}
+	if exists(bak) {
+		return nil // a current backup wins: it was made first
+	}
+	return os.Rename(old, bak)
+}
+
 // backupAndWrite writes a policy file as root. It refuses links (at the file
 // and at its backup) and folders that a user other than root could change, so
 // nobody can point the write at another file. Backups are private (0600): they
@@ -266,6 +287,12 @@ func backupAndWrite(f string, content []byte) (Written, error) {
 		return Written{}, err
 	}
 	if err := safefile.RefuseLink(f); err != nil {
+		return Written{}, err
+	}
+	if err := safefile.RefuseLink(f + legacyBackupSuffix); err != nil {
+		return Written{}, err
+	}
+	if err := adoptLegacyBackup(f); err != nil {
 		return Written{}, err
 	}
 	bak := f + backupSuffix
@@ -293,6 +320,7 @@ func backupAndWrite(f string, content []byte) (Written, error) {
 // a user controls (the Firefox app bundle on macOS) are only deleted when they
 // are still plain files.
 func restoreOrRemove(f string) error {
+	_ = adoptLegacyBackup(f)
 	bak := f + backupSuffix
 	backup := false
 	if st, err := os.Lstat(bak); err == nil && st.Mode().IsRegular() {

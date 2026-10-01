@@ -1,12 +1,30 @@
+# Dependencies and build output
 node_modules
 dist
 dist-ext
+agent/dist
+packaging/out
 *.zip
-.DS_Store
+*.tar.gz
+
+# Test output
 test-results
 playwright-report
 test-builds
-*.tar.gz
+coverage
+
+# Local and private material: notes, plans, design rounds, AI outputs and screenshots.
+# Everything that is not part of the public project goes in private/ (see private/README.md).
+private/
+
+# Secrets and editor or OS noise
 .env
-agent/dist
-packaging/out
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+.vscode/*
+!.vscode/extensions.json
+.idea

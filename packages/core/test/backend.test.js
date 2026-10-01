@@ -278,6 +278,19 @@ describe('export / import', () => {
     expect(r.data.tasks).toBe(1)
     expect(r.state.security.hasPin).toBe(true)
   })
+
+  it('imports a backup made before the rename (app: FocusGateway)', async () => {
+    await fresh()
+    await be.dispatch('tasks.create', { title: 'From FocusGateway', deadline: at(25, 12) })
+    const { data: dump } = await be.dispatch('data.export')
+    expect(dump.app).toBe('Regimen')
+    const old = { ...dump, app: 'FocusGateway' }
+    await be.dispatch('data.reset', { pin: PIN, confirmation: `I want to permanently delete all my data because ${reason}` })
+    await be.dispatch('setup.pin', { pin: PIN })
+    const r = await be.dispatch('data.import', { data: old, pin: PIN })
+    expect(r.data.tasks).toBe(1)
+    expect(r.state.tasks[0].title).toBe('From FocusGateway')
+  })
 })
 
 describe('loophole regressions', () => {

@@ -2,9 +2,8 @@ dist
 dist-ext
 node_modules
 package-lock.json
-.agents
-SPEC.md
-TECHNICAL-PRD.md
+private
+test-builds
 test-results
 playwright-report
 *.md

@@ -12,9 +12,10 @@
 BIN=/opt/regimen/regimen-agent
 
 post_install() {
-  if [ -f /etc/systemd/system/regimen-agent.service ]; then
+  if [ -f /etc/systemd/system/regimen-agent.service ] || [ -f /etc/systemd/system/focusgateway-agent.service ] || [ -f /var/lib/focusgateway/config.json ]; then
     # Reinstalled while an earlier copy still runs (for example the one kept
-    # during a block): point the service back at the packaged binary.
+    # during a block): point the service back at the packaged binary. This also
+    # moves an install from before the rename (FocusGateway) over, pairing kept.
     "$BIN" install --keep-settings --no-browser --no-pause >/dev/null || true
     return 0
   fi

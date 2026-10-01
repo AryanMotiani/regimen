@@ -1,4 +1,4 @@
-﻿// The real extension and the real Go lock agent, paired through the one-click link
+// The real extension and the real Go lock agent, paired through the one-click link
 // the agent opens after installing. The agent runs with a temporary data folder
 // and a fake hosts file, so nothing on this computer changes.
 // Needs the agent binary: npm run agent:build -- --target <os>/<arch>

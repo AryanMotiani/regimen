@@ -1,4 +1,4 @@
-﻿# Regimen troubleshooting
+# Regimen troubleshooting
 
 This file works offline. It is also copied into the lock agent's install folder.
 

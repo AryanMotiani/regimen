@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
@@ -67,5 +69,43 @@ func TestPairCodeExpires(t *testing.T) {
 	cfg.PairExpiresAt = 0
 	if pairCodeLive(cfg) {
 		t.Fatal("a code without expiry (older versions) is not live")
+	}
+}
+
+func TestInstallMovesAnOldFocusGatewayInstall(t *testing.T) {
+	root := t.TempDir()
+	old, cur := filepath.Join(root, "focusgateway"), filepath.Join(root, "regimen")
+	t.Setenv("REGIMEN_DATA", cur)
+	t.Setenv("REGIMEN_LEGACY_DATA", old)
+	removed := 0
+	saved := legacyService
+	t.Cleanup(func() { legacyService = saved })
+	legacyService.installed = func() bool { return false }
+	legacyService.remove = func() { removed++ }
+
+	// Nothing old around: nothing happens.
+	migrateLegacy()
+	if removed != 0 {
+		t.Fatal("no old install, no cleanup")
+	}
+
+	if err := os.MkdirAll(old, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	_ = os.WriteFile(filepath.Join(old, "config.json"), []byte(`{"pairCode":null,"secretHash":"h","strict":true,"chromeExtensionId":"","firefoxXpiUrl":""}`), 0o600)
+	_ = os.WriteFile(filepath.Join(old, "snapshot.json"), []byte(`{"sentAt":1,"rules":[]}`), 0o600)
+	if err := prepareDataDir(); err != nil {
+		t.Fatal(err)
+	}
+	migrateLegacy()
+	if removed != 1 {
+		t.Fatal("the old service is stopped before its data moves")
+	}
+	cfg, ok := paths.ReadConfig()
+	if !ok || paths.Val(cfg.SecretHash) != "h" || !cfg.Strict {
+		t.Fatalf("the pairing and strict mode carry over: %+v", cfg)
+	}
+	if _, err := os.Stat(old); err == nil {
+		t.Fatal("the emptied old folder is removed")
 	}
 }

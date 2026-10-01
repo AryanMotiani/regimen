@@ -70,6 +70,12 @@ Run the pairing step again. It makes a fresh link and a code you can type instea
 
 Then either open the link it prints, or type the code on the Regimen Install page ("Have a pairing code?") or in Settings, Lock agent.
 
+## Upgrading from FocusGateway
+
+Regimen used to be called FocusGateway. If you installed the FocusGateway lock agent (v1.2.0 or older), just install the Regimen one the usual way for your system. It finds the old agent, stops and removes it (its service, shortcuts and program folder), and moves its data over, so it stays paired with your extension and a running no-failsafe block keeps running. Old blocked-site entries in the hosts file and old browser policy files are cleaned up on the way. On Linux the `regimen-agent` package replaces the `focusgateway-agent` package (and `regimen-agent-bin` replaces `focusgateway-agent-bin` on the AUR).
+
+Update the browser extension too: the new website address (`/regimen/`) only connects to the Regimen extension.
+
 ## Is this safe?
 
 The agent needs admin rights because the hosts file and browser policies are system settings. It only listens on your own computer (`127.0.0.1`), only answers the Regimen extension (which proves itself with a secret made when you paired), and never connects to the internet. Everything is open source: [agent/](../agent) is the whole program. See the [privacy policy](https://aryanmotiani.github.io/regimen/privacy.html) and [TROUBLESHOOTING.md](../TROUBLESHOOTING.md) for the emergency recovery tool.

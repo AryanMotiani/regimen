@@ -1,0 +1,6 @@
+# Optional: deploy the Regimen website on Netlify instead of GitHub Pages.
+# Copy this file to the repository root, then import the repository in Netlify.
+# See docs/DEPLOYMENT.md. Netlify reads the Node.js version from .nvmrc.
+[build]
+  command = "npm ci && npm run build:web"
+  publish = "apps/web/dist"

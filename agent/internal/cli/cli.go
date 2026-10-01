@@ -13,6 +13,7 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -371,6 +372,7 @@ func install(rest args) exitCode {
 		fmt.Fprintln(os.Stderr, red("Could not set up "+paths.DataDir()+": "+err.Error()))
 		return 1
 	}
+	migrateLegacy()
 	lockDownDataDir()
 	// one-time backup of the original hosts file (never overwritten)
 	bak := paths.File("hosts.original.bak")
@@ -455,6 +457,69 @@ func install(rest args) exitCode {
 	fmt.Println("\nRestart your browsers so the new policies apply.")
 	fmt.Println("\nEmergency recovery if the agent ever breaks: " + bold(service.RecoveryHint))
 	return 0
+}
+
+// legacyService is the old service registration (replaced in tests, which must
+// never touch the real system).
+var legacyService = struct {
+	installed func() bool
+	remove    func()
+}{service.LegacyInstalled, service.RemoveLegacy}
+
+// legacyPresent reports whether an agent from before the rename to Regimen
+// (FocusGateway, up to v1.2.0) is installed or left data behind.
+func legacyPresent() bool {
+	if legacyService.installed() {
+		return true
+	}
+	if d := paths.LegacyDataDir(); d != "" {
+		if _, err := os.Lstat(filepath.Join(d, "config.json")); err == nil {
+			return true
+		}
+	}
+	_, err := os.Lstat(filepath.Join(paths.LegacyProgramDir(), paths.LegacyBinaryName()))
+	return err == nil
+}
+
+// migrateLegacy upgrades an install from before the rename: it stops and
+// removes the old FocusGateway service (so two agents never fight over the
+// port and the hosts file), then moves the old data folder's files (pairing,
+// snapshot with any running no-failsafe block, hosts backup, policy records)
+// into the Regimen data folder. The old hosts block is replaced by the new one
+// on the first sync (the hosts layer still recognises its markers), and old
+// policy files are undone by the next policies.Apply through the moved
+// records. Old folders that a non-admin could have made are not trusted.
+func migrateLegacy() {
+	if !legacyPresent() {
+		return
+	}
+	fmt.Println("Found the earlier FocusGateway lock agent: moving it over to Regimen.")
+	legacyService.remove()
+	old := paths.LegacyDataDir()
+	trusted := old != ""
+	for _, dir := range []string{paths.LegacyOwnParent(), old} {
+		if dir == "" {
+			continue
+		}
+		if _, err := os.Lstat(dir); err != nil {
+			continue
+		}
+		if problem := safefile.AdminOwnedDir(dir); problem != nil {
+			fmt.Println(yellow("    Not moving the old data: " + problem.Error()))
+			trusted = false
+		}
+	}
+	if trusted {
+		n, err := paths.MigrateLegacyData(old, paths.DataDir())
+		if err != nil {
+			fmt.Println(yellow("    Some old files could not be moved: " + err.Error()))
+		}
+		if n > 0 {
+			paths.Log(fmt.Sprintf("moved %d file(s) from the FocusGateway data folder %s", n, old))
+			fmt.Println(dim(fmt.Sprintf("    Kept your pairing and settings (%d file(s) moved from %s)", n, old)))
+		}
+		paths.RemoveEmptyLegacyDirs()
+	}
 }
 
 func readLine(prompt string) string {

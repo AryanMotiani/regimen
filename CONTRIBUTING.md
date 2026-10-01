@@ -1,4 +1,4 @@
-﻿# Contributing to Regimen
+# Contributing to Regimen
 
 Thanks for helping! Regimen is built by and for students who want their focus back. Every kind of help counts: code, adding sites to the block list, testing on your browser or OS, design, docs and translations.
 
@@ -111,4 +111,4 @@ CI runs lint, unit tests on Windows, macOS and Linux (JavaScript and Go), a cros
 3. Commit, then tag and push: `git tag v1.2.0 && git push origin master --tags`.
 4. The Release workflow checks the tag matches `package.json`, runs everything, builds the extension zips, the agent binaries and installers (Windows, macOS, Linux), and publishes a GitHub Release. If store secrets are configured it also uploads to addons.mozilla.org, Edge Add-ons and the Chrome Web Store.
 
-Store accounts, secrets and the full release flow are in [docs/MAINTAINER_SETUP.md](docs/MAINTAINER_SETUP.md).
+Store accounts, secrets and the full release flow are in [docs/RELEASING.md](docs/RELEASING.md). How the whole codebase fits together: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).

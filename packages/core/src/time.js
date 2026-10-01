@@ -1,5 +1,5 @@
 // Local-clock time helpers. Regimen deliberately reads the system clock and
-// stores no timezone (see SPEC.md "Timezone Handling"). All instants are epoch ms.
+// stores no timezone (see docs/ARCHITECTURE.md, "Time and the clock"). All instants are epoch ms.
 
 export const MINUTE = 60_000
 export const HOUR = 60 * MINUTE

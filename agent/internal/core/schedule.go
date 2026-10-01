@@ -6,7 +6,7 @@ import (
 )
 
 // Local-clock helpers. Regimen reads the system clock and stores no time
-// zone (SPEC.md "Timezone Handling"). All instants are epoch milliseconds.
+// zone (docs/ARCHITECTURE.md, "Time and the clock"). All instants are epoch milliseconds.
 
 func local(ms int64) time.Time { return time.UnixMilli(ms).In(time.Local) }
 

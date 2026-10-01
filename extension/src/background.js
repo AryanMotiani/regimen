@@ -3,14 +3,21 @@
 // notifications, and mirrors a snapshot to the optional lock agent.
 import { createBackend, toErrorPayload, computeBlocks, hostMatches, BUNDLES } from '@regimen/core'
 import { appUrl, isOfficialApp, isDevApp } from './app-url.js'
+import { migrateLegacyStorage } from './legacy.js'
 
 const ext = globalThis.browser ?? globalThis.chrome
 const STORE_KEY = 'r_state'
 const ORIGINS_KEY = 'r_approved_origins'
 const EXT_ORIGIN = new URL(ext.runtime.getURL('/')).origin
 
+// Data saved by FocusGateway (before the rename) moves to the new keys before the first read.
+const migrated = migrateLegacyStorage(ext.storage.local).catch((e) => console.error('[Regimen] storage migration failed', e))
+
 const storage = {
-  load: async () => (await ext.storage.local.get(STORE_KEY))[STORE_KEY] ?? null,
+  load: async () => {
+    await migrated
+    return (await ext.storage.local.get(STORE_KEY))[STORE_KEY] ?? null
+  },
   save: (s) => ext.storage.local.set({ [STORE_KEY]: s }),
 }
 const backend = createBackend({ storage })
@@ -200,6 +207,7 @@ async function syncAgent(state) {
 
 // ---------------------------------------------------------------- messaging
 async function approvedOrigins() {
+  await migrated
   return (await ext.storage.local.get(ORIGINS_KEY))[ORIGINS_KEY] || []
 }
 

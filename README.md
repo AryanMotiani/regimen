@@ -1,160 +1,101 @@
-# Regimen
+<p align="center">
+  <img src="apps/web/public/logo.svg" alt="Regimen logo" width="96" height="96" />
+</p>
 
-[![CI](https://github.com/AryanMotiani/regimen/actions/workflows/ci.yml/badge.svg)](https://github.com/AryanMotiani/regimen/actions/workflows/ci.yml)
-[![Deploy website](https://github.com/AryanMotiani/regimen/actions/workflows/pages.yml/badge.svg)](https://github.com/AryanMotiani/regimen/actions/workflows/pages.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-6152e8.svg)](LICENSE)
-[![PRs welcome](https://img.shields.io/badge/PRs-welcome-1f9d6a.svg)](CONTRIBUTING.md)
+<h1 align="center">Regimen</h1>
 
-Block distracting websites until your work is done. Tasks, a minimal habit tracker, a weekly schedule and a lofi study room, all in one free and open-source app.
+<p align="center"><b>Your tasks first. Then the internet.</b><br />
+A site blocker that only lets go when your work is done, with a cozy study room to do the work in.</p>
 
-It works in Chrome, Edge, Brave, Opera, Vivaldi, Arc and Firefox. With the optional lock agent it blocks in every browser and app on the computer (Safari included). There is no server and no account. Your data stays on your computer ([privacy policy](https://aryanmotiani.github.io/regimen/privacy.html)).
+<p align="center">
+  <a href="https://github.com/AryanMotiani/regimen/actions/workflows/ci.yml"><img src="https://github.com/AryanMotiani/regimen/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://github.com/AryanMotiani/regimen/actions/workflows/pages.yml"><img src="https://github.com/AryanMotiani/regimen/actions/workflows/pages.yml/badge.svg" alt="Deploy website" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-6152e8.svg" alt="License: MIT" /></a>
+  <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-1f9d6a.svg" alt="PRs welcome" /></a>
+</p>
 
-## Install
+<p align="center">
+  <a href="https://aryanmotiani.github.io/regimen/"><b>Open Regimen</b></a> ·
+  <a href="https://aryanmotiani.github.io/regimen/#/install">Install</a> ·
+  <a href="docs/USER-GUIDE.md">User guide</a> ·
+  <a href="docs/ARCHITECTURE.md">How it works</a>
+</p>
 
-Open the **[Install page](https://aryanmotiani.github.io/regimen/#/install)**. It detects your browser and computer and shows two buttons:
+<p align="center">
+  <img src="apps/web/public/media/room-night.webp" alt="The Regimen study room at night: a student at a desk by a rainy window, with the focus timer, planner and music windows open" width="820" />
+</p>
 
-1. **The browser extension.** One click from [Firefox Add-ons](docs/store/CHECKLIST-FIREFOX.md) and [Edge Add-ons](docs/store/CHECKLIST-EDGE.md) once the listings are live. Chrome, Brave and Opera install it by hand for now (four clicks, the page shows how) until the Chrome Web Store listing exists.
-2. **The lock agent (optional, recommended).** One download: `Regimen-Setup.exe` for Windows, `Regimen.pkg` for macOS, a `.deb` or `.rpm` for Linux (or `curl -fsSL https://github.com/AryanMotiani/regimen/releases/latest/download/install.sh | sh`). Open it, and your browser connects it to the extension by itself. No Node.js or anything else to install. The downloads are not code-signed yet, so [Windows and macOS show a warning once](docs/INSTALL-AGENT.md).
-
-## Documentation
-
-- **[User guide](docs/USER-GUIDE.md)**: getting started, blocking, focus sessions, habits, the study room, XP and FAQ. Every page of the app also has a **?** help button and a first-visit tour.
-- **[Sites not blocked?](docs/TROUBLESHOOTING-blocking.md)** Quick checks, and the **Test blocking** button in Settings.
-- **[Developer guide](docs/DEVELOPER-GUIDE.md)**: architecture, how blocking is computed, adding themes, room items, tracks and badges, testing and releasing.
+Regimen is free and open source. It works in Chrome, Edge, Brave, Opera, Vivaldi, Arc and Firefox, and with the optional lock agent it blocks in every browser and app on your computer, Safari included. No account, no server, no tracking.
 
 ## What it does
 
-**Task-Gated windows.** Pick sites and a time window, then attach tasks. The sites stay blocked during the window until every attached task is done. If the window ends with tasks still open, the block keeps going until you finish them. A window with no tasks stays blocked (no empty-window loophole).
+- **Task-gated blocking.** Pick sites and a time window, attach tasks. The sites stay blocked until every task is done. If the window ends with work left, the block keeps going until you finish. An empty window stays blocked too, so there is no loophole.
+- **Hard blocks.** Blocked for the whole window, full stop. For the days you really mean it, turn off the escape hatch for a rule.
+- **Focus sessions.** Pomodoro-style rounds that start right away and block your picked sites through the breaks as well.
+- **Failsafe.** The emergency exit, made slow on purpose: an "are you sure?", your PIN, a wait you choose (30 seconds to 5 minutes) and a typed reason with pasting turned off. It unlocks only the current window and is logged.
+- **Study room.** Your home screen: a little room with a student at a desk, a window onto a scene, and windows you drag, resize and dock (focus timer, planner, music, scratchpad, scene). A generative lofi radio and optional rain or fireplace sounds play right in the browser, so the music keeps going when YouTube is blocked.
+- **Decor, coins and shop.** Studying, finishing tasks and keeping habits earn XP, levels and coins. Spend coins on decor, avatar looks, room styles, scenes and music. Daily caps and minimum task ages keep it honest, so the coins mean you studied.
+- **Habits.** A minimal tracker on purpose: pick the days, tick them off, keep the streak.
+- **Accountability.** A clear picture of how your windows, blocks, tasks and focus time went, the good stuff first, with charts for the last two weeks and the reasons you typed when you gave in.
+- **Tasks and schedule.** Deadlines, subtasks, tags, repeats, a stopwatch per task, a board and a week view. Pushing a task to the next window is limited by its priority.
+- **Game and Calm themes.** Eight full themes in two styles (Game: Sunny Quest, Storybook, Arcade, Night Owl. Calm: Paper, Nordic, Midnight Library, Studio), each in light and dark.
 
-**Hard blocks.** Blocked for the whole window, full stop. You can remove the escape hatch entirely for a rule. Hard blocks and task-gated windows can't overlap on the same site.
+<p align="center">
+  <img src="apps/web/public/media/stats.webp" alt="The Accountability page with focus charts and the slips you logged" width="820" />
+</p>
 
-**Focus sessions.** Pomodoro-style rounds that start right away. Sites stay blocked through the breaks too.
+## Get started
 
-**Failsafe.** The emergency exit: an "are you sure?" screen, your PIN, a forced wait (30 seconds to 5 minutes, you choose) and a typed reason with pasting disabled. It unlocks only the current window and is logged.
+1. **Open the website:** [aryanmotiani.github.io/regimen](https://aryanmotiani.github.io/regimen/). You can try the study room, tasks and habits right away. Your data stays in your browser.
+2. **Add the browser extension** to make blocking work. The [Install page](https://aryanmotiani.github.io/regimen/#/install) detects your browser and shows the quickest way. Store listings (Firefox Add-ons, Edge Add-ons, Chrome Web Store) are on the way. Until then the Install page walks you through installing the extension by hand in a few clicks, from the [latest release](https://github.com/AryanMotiani/regimen/releases/latest).
+3. **Optional: the lock agent.** One download (`Regimen-Setup.exe` for Windows, `Regimen.pkg` for macOS, `.deb` or `.rpm` for Linux, also on the Install page). It blocks in every browser and app, switches off Secure DNS and private windows, and keeps a no-escape block going even if the extension is removed. The downloads are not code-signed yet, so Windows and macOS warn once: see [Installing the lock agent](docs/INSTALL-AGENT.md).
 
-**Friction for going easy on yourself.** Deleting a task, pushing a deadline back, lowering priority or stopping a focus session early means typing a sentence and a real reason. Raising the bar gets a small cheer instead.
+Already set up on the website before installing the extension? Nothing to redo: your PIN, rules, tasks and habits move into the extension by themselves.
 
-**Tasks and schedule.** Deadlines on everything, subtasks (never later or lower-priority than the parent), tags, repeats (daily, chosen weekdays, every N days), a per-task stopwatch, a list and a drag-and-drop board, and a week view where dragging a task moves its deadline.
+More: the [user guide](docs/USER-GUIDE.md) and [sites not blocked?](docs/TROUBLESHOOTING-blocking.md)
 
-**Forward limits.** A task in a study window can be sent to the next window a limited number of times: high priority once, medium three times, low five times. Colours go green, yellow, red as you use them up.
+## Privacy
 
-**Habits.** Minimal on purpose. Pick days, tick them off, keep the streak.
+Regimen is local first. There is no account and no Regimen server: your tasks, rules, habits and room live in your browser's storage or the extension's storage, and the lock agent keeps its files on your computer. Regimen never receives your data, and there are no cookies, analytics or ads. Backups are a JSON file you export and import yourself (Settings, Backup). Details in the [privacy policy](https://aryanmotiani.github.io/regimen/privacy.html).
 
-**Study room.** A rainy window scene with generative lofi music and rain, café, fire and brown-noise ambience, synthesized live in the browser. No audio files and no streaming, so it keeps playing when YouTube is blocked. Start a focus round from the room and it really blocks sites.
+## FAQ
 
-**Accountability.** Four cards (Task-Gated windows, Hard blocks, Tasks, Focus) with the good stuff on top and the slips below, charts for the last 14 days, and a full history with your typed reasons.
+**Can't I just turn it off?** You can, slowly. That is the point. The Failsafe takes your PIN, a wait and a typed reason, and a rule without Failsafe can't be edited or deleted while it runs. With the lock agent, removing the extension or switching browsers doesn't help either. Anyone with admin rights can undo software on their own computer in the end, so Regimen aims to make giving in deliberate and visible, not impossible.
 
-## How it fits together
+**Does it work on my phone?** Not yet. The website works on a phone for tasks, habits and the study room, but blocking needs a desktop browser extension. See the [roadmap](docs/ROADMAP.md).
 
-```
-apps/web        Vue 3 + Tailwind web app (landing page, dashboard, everything you see)
-extension       Manifest V3 browser extension. Holds your data, runs the rules,
-                blocks with declarativeNetRequest. Ships a copy of the web app inside.
-agent           Optional lock agent. One small Go program (no runtime to install) that
-                enforces the same rules through the hosts file and sets browser policies.
-packages/core   The rules engine shared by the app and extension (pure JavaScript, fully
-                tested). The agent carries a Go port that is tested against it.
-packaging       Windows, macOS and Linux installers for the agent, plus winget, Homebrew
-                and AUR templates
-```
+**I used FocusGateway. Is my data still there?** Yes. FocusGateway was this project's old name. The website, the extension and the lock agent all move your data from the old names on first start, the agent pairing included.
 
-The **backend** in `packages/core/src/backend.js` is the single authority for every rule: PIN checks, the Failsafe cooldown, typed confirmations, conflict checks. It runs inside the extension's background worker. The web app only sends it commands.
+## For developers
 
-The web app runs in three modes and picks one on its own:
+Regimen is an npm workspaces monorepo: a Vue 3 web app, a Manifest V3 extension, a shared rules engine in plain JavaScript and an optional lock agent in Go. Start with **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** for the big picture and the [developer guide](docs/DEVELOPER-GUIDE.md) for recipes.
 
-| Mode | When | Blocking |
-|---|---|---|
-| Extension | Opened from the extension (toolbar icon) | Yes |
-| Bridge | The official website (what the extension opens when online), or a localhost copy you allowed in the extension | Yes |
-| Standalone | Hosted copy, no extension | No. Tasks, habits and the room work, saved in the browser. Data can be moved into the extension later |
-
-### Why it is hard to get around
-
-| Trick | What stops it |
-|---|---|
-| Open the site in another tab or window | Extension blocks every request to the site and redirects open tabs when a block starts |
-| Use another browser or an app | Lock agent writes the sites into the system hosts file |
-| Turn on Secure DNS (DoH) to skip the hosts file | Lock agent sets browser policies that switch Secure DNS off and lock the setting (Chrome, Edge, Brave, Chromium, Firefox) |
-| Incognito, guest window or a new browser profile | Lock agent disables them by policy |
-| Disable or remove the extension | Lock agent keeps blocking at system level. With `--strict` the extensions page is locked too. Publishing to the stores lets the agent force-install the extension so it can't be removed |
-| Delete or weaken a running no-failsafe rule | Backend refuses. The agent also keeps its own copy until the window ends |
-| Stop the agent service | Blocks stay in the hosts file. The service manager restarts it |
-| Run the recovery tool | It refuses while the agent is healthy |
-
-**Honest limits.** Anyone with administrator rights can eventually undo any software on their own computer: editing the hosts file by hand, uninstalling after a block ends, changing the system clock, using a VPN or custom DNS, editing stored data directly. Regimen is a commitment tool. Its job is to make giving in slow, deliberate and visible.
-
-## Run it locally
-
-Needs Node.js 20.19 or newer. The lock agent also needs Go 1.24 or newer.
+Needs Node.js 20.19 or newer (the lock agent also needs Go 1.24 or newer).
 
 ```bash
-npm install
+npm ci
 npm run dev          # web app at http://localhost:5173
-npm test             # unit tests for the engine and backend
-npm run build        # web app + extension (extension/dist/chromium and extension/dist/firefox)
+npm test             # unit tests (engine, backend, migrations)
+npm run check        # lint, format check, unit tests and build, like CI
 npm run agent:test   # go vet and go test for the lock agent
-npm run agent:build  # lock agent for Windows, macOS and Linux (agent/dist)
-npm run test:e2e     # loads the built extension into Chromium and tests real blocking (and pairing with the agent)
-npm run check        # everything CI checks for the JavaScript side: lint, format, unit tests, build
 ```
 
-Load the extension in Chrome: `chrome://extensions`, turn on Developer mode, **Load unpacked**, pick `extension/dist/chromium`. For Firefox use `about:debugging`, **Load Temporary Add-on**, pick `extension/dist/firefox/manifest.json`.
-
-If you set Regimen up on the website before installing the extension, you don't redo anything: the website connects to the extension by itself and your PIN, rules, tasks, habits and what you have already seen (the room intro, tips) move into the extension.
-
-## Deploy for free
-
-The web app is a static site. Any of these work with no server and no database:
-
-- **GitHub Pages.** Push to `master`. Once CI passes, `.github/workflows/pages.yml` builds and deploys. Turn on Pages with source "GitHub Actions" in the repo settings.
-- **Netlify.** Import the repo. `netlify.toml` is already set up.
-- **Vercel.** Import the repo. `vercel.json` is already set up.
-- **Cloudflare Pages.** Build command `npm run build:web`, output directory `apps/web/dist`.
-
-It uses hash routing and relative paths, so it works on a sub-path (like `username.github.io/regimen/`) with no extra config.
-
-**Releases.** Push a tag like `v1.0.0`. The release workflow builds the extension zips, the lock agent for six platforms, the Windows setup, the macOS package, `.deb` and `.rpm` packages and `install.sh`, and attaches them to a GitHub Release with stable file names, so the Install page always links to the newest. With store secrets set, it also publishes to Firefox Add-ons and Edge Add-ons (and the Chrome Web Store later). See [docs/MAINTAINER_SETUP.md](docs/MAINTAINER_SETUP.md).
-
-After you publish, edit `apps/web/src/config.js` with your repo URL and the store links.
-
-### Publishing the extension
-
-- **Firefox Add-ons** (free) and **Edge Add-ons** (free): checklists in [docs/store](docs/store), listing text in [docs/store/LISTING.md](docs/store/LISTING.md).
-- **Chrome Web Store:** one-time 5 USD developer fee, planned for later. Everything is prepared in [docs/store/CHECKLIST-CHROME.md](docs/store/CHECKLIST-CHROME.md). Opera add-ons also take the Chromium zip.
-- Once listed, install the agent with `--chrome-extension-id <id>` (and `--firefox-xpi <url>`) and it will force-install the extension so it can't be removed.
-
-## Lock agent
-
-Install it from the [Install page](https://aryanmotiani.github.io/regimen/#/install) (see [docs/INSTALL-AGENT.md](docs/INSTALL-AGENT.md)). It is one static Go binary of about 7 MB. Double-click it (or run `regimen-agent` with no arguments) and it asks for admin rights, copies itself to a system folder, registers a service that starts at boot and restarts on crash (Task Scheduler, launchd or systemd), writes the browser policies and opens Regimen in your browser with a one-time pairing link. The page connects the extension to the agent by itself. The link carries the code after the `#`, so it never reaches a server, and it expires after 30 minutes or first use. The agent also prints a **pairing code** you can type in the app instead.
+End-to-end tests load the real extension into Chromium and check that sites are really blocked:
 
 ```bash
-regimen-agent install [--strict]   # admin, --strict also locks the extensions page, flags and developer tools
-regimen-agent status               # is it running, is it paired, what is blocked
-regimen-agent pair                 # admin, a fresh pairing link and code
-regimen-agent recover              # admin, emergency: clear blocks if the agent is broken
-regimen-agent policies             # admin, re-apply browser policies after installing a new browser
-regimen-agent uninstall [--purge]  # admin, refused while a no-failsafe block is running
+npm run build && npm run agent:build
+npx playwright install chromium
+npm run test:e2e
 ```
 
-Safety nets: hosts-file writes are atomic and only touch lines between Regimen's markers. If the agent crashes 4 times in 2 minutes it clears its blocks for 10 minutes instead of leaving you stuck (fail-open). `recover` clears the blocks when the agent is broken and refuses when it is healthy. A one-time backup of the original hosts file is kept in the data folder. See [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
+Load your build in Chrome at `chrome://extensions` (Developer mode, **Load unpacked**, `extension/dist/chromium`), or in Firefox at `about:debugging` (**Load Temporary Add-on**, `extension/dist/firefox/manifest.json`).
 
-## Changes from the original PRD
-
-The original `SPEC.md` and `TECHNICAL-PRD.md` are kept as the product source. This build follows their behaviour (modes, conflicts, empty-window rule, Failsafe flow, PIN rules, type-to-confirm, forward limits, subtask rules, streaks, accountability layout, export and import, system-clock time) with these deliberate changes:
-
-- **Browser extension as the main blocker, hosts file as the lock layer.** A website can't block other sites, and the hosts-file-only design needed an admin install before anyone could try it. The extension installs in seconds everywhere. The agent adds the system-wide, no-bypass layer on top.
-- **Secure DNS is closed in code.** The PRD documented DoH as a limitation. The agent now switches it off through browser policies.
-- **No database server.** Data lives in the extension's local storage (or the browser in standalone mode). MySQL and MongoDB were dropped because hosting them costs money and every install would need a database. Export and import JSON replaces them for backups.
-- **One process per piece, OS restarts instead of a custom watchdog.** systemd, launchd and Task Scheduler already restart crashed services reliably. The crash-loop fail-open rule is kept.
-- **Added:** habit tracker, lofi study room, Kanban board, week view.
-- **Trimmed:** the landing-page analytics globe and waitlist (these needed a server and a database), the tray icon (the extension's toolbar popup does the same job without native dependencies).
+The website deploys to GitHub Pages after CI passes on `master` ([DEPLOYMENT.md](docs/DEPLOYMENT.md)). Releases are built from version tags ([RELEASING.md](docs/RELEASING.md)).
 
 ## Contributing
 
-Contributions are welcome, from adding a distracting site to the block list to new features. Start with [CONTRIBUTING.md](CONTRIBUTING.md). Please read the [Code of Conduct](CODE_OF_CONDUCT.md), and report security problems or ways around a block privately as described in [SECURITY.md](SECURITY.md).
-
-Every pull request runs lint, unit tests on Windows, macOS and Linux (JavaScript and the Go agent), a cross build of the agent, the build, a Firefox add-on lint and end-to-end tests with the real extension and the real agent. Merging to `master` deploys the website. Pushing a version tag publishes a release. The locked design decisions are in `.agents/ACTIVE_SPEC.md` (the repo uses the [SkilledAgent](https://www.npmjs.com/package/skilledagent) workspace).
+Contributions are welcome, from adding a distracting site to a block list to new room decor or a whole feature. Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md). Found a way around a block, or a security problem? Please report it privately as described in [SECURITY.md](SECURITY.md). Ideas for what comes next are in the [roadmap](docs/ROADMAP.md).
 
 ## License
 
-MIT
+[MIT](LICENSE)

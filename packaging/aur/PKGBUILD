@@ -11,7 +11,9 @@ url="https://github.com/AryanMotiani/regimen"
 license=('MIT')
 depends=('systemd')
 provides=('regimen-agent')
-conflicts=('regimen-agent')
+conflicts=('regimen-agent' 'focusgateway-agent')
+# The package was called focusgateway-agent-bin before the rename (up to v1.2.0).
+replaces=('focusgateway-agent-bin')
 install=regimen-agent.install
 source=("LICENSE::https://raw.githubusercontent.com/AryanMotiani/regimen/v${pkgver}/LICENSE")
 source_x86_64=("regimen-agent-${pkgver}-x86_64::https://github.com/AryanMotiani/regimen/releases/download/v${pkgver}/regimen-agent-linux-amd64")

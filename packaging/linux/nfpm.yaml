@@ -15,6 +15,14 @@ vendor: Regimen (open source)
 homepage: https://github.com/AryanMotiani/regimen
 license: MIT
 
+# The package was called focusgateway-agent before the rename (up to v1.2.0).
+# Installing this one replaces it (deb Replaces and Conflicts, rpm Obsoletes),
+# and `regimen-agent install` in postinstall moves its pairing and data over.
+replaces:
+  - focusgateway-agent
+conflicts:
+  - focusgateway-agent
+
 contents:
   - src: ${ROOT}/agent/dist/regimen-agent-linux-${GOARCH}
     dst: /opt/regimen/regimen-agent

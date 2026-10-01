@@ -27,7 +27,22 @@ const (
 	MarkerStart = "# >>> REGIMEN-MANAGED-START (do not edit; run `regimen-agent recover` if stuck)"
 	// MarkerEnd closes the managed block.
 	MarkerEnd = "# <<< REGIMEN-MANAGED-END"
+
+	// The markers the agent wrote before the project was renamed from
+	// FocusGateway to Regimen (up to v1.2.0). They are still recognised, so an
+	// upgrade, `recover` and `uninstall` remove an old block instead of leaving
+	// stale entries behind. New blocks always use the markers above.
+	legacyMarkerPrefix = "# >>> FOCUSGATEWAY-MANAGED-START"
+	legacyMarkerEnd    = "# <<< FOCUSGATEWAY-MANAGED-END"
 )
+
+func isStart(line string) bool {
+	return strings.HasPrefix(line, markerPrefix) || strings.HasPrefix(line, legacyMarkerPrefix)
+}
+
+func isEnd(line string) bool {
+	return strings.HasPrefix(line, MarkerEnd) || strings.HasPrefix(line, legacyMarkerEnd)
+}
 
 // Path is the system hosts file. REGIMEN_HOSTS overrides it (tests and development).
 func Path() string {
@@ -135,15 +150,16 @@ func ExpandDomains(domains []string) []string {
 	return out
 }
 
-// StripManaged removes our managed block and trailing blank lines, leaving everything else intact.
+// StripManaged removes our managed block (and one an earlier FocusGateway
+// version wrote) and trailing blank lines, leaving everything else intact.
 func StripManaged(content string) []string {
 	var out []string
 	inside := false
 	for _, line := range splitLines(content) {
 		switch {
-		case strings.HasPrefix(line, markerPrefix):
+		case isStart(line):
 			inside = true
-		case strings.HasPrefix(line, MarkerEnd):
+		case isEnd(line):
 			inside = false
 		case !inside:
 			out = append(out, line)
@@ -172,15 +188,16 @@ func Render(content string, domains []string, eol string) string {
 	return strings.Join(lines, eol) + eol
 }
 
-// ManagedDomains lists the host names inside our block.
+// ManagedDomains lists the host names inside our block (and inside a block an
+// earlier FocusGateway version left behind).
 func ManagedDomains(content string) []string {
 	set := map[string]bool{}
 	inside := false
 	for _, line := range splitLines(content) {
 		switch {
-		case strings.HasPrefix(line, markerPrefix):
+		case isStart(line):
 			inside = true
-		case strings.HasPrefix(line, MarkerEnd):
+		case isEnd(line):
 			inside = false
 		case inside:
 			if f := strings.Fields(line); len(f) > 1 {

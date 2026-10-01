@@ -132,10 +132,14 @@ func Uninstall() {
 	_ = platform.Run("schtasks", "/End", "/TN", paths.ServiceName)
 	_ = platform.Run("schtasks", "/Delete", "/TN", paths.ServiceName, "/F")
 	_ = os.RemoveAll(startMenuDir())
-	// stop any leftover process listening on our port (never ourselves)
+	stopPortListeners()
+	unregisterUninstall()
+}
+
+// stopPortListeners stops any leftover process listening on our port (never ourselves).
+func stopPortListeners() {
 	_ = platform.Run("powershell", "-NoProfile", "-NonInteractive", "-Command",
 		"Get-NetTCPConnection -LocalPort 47621 -State Listen -ErrorAction SilentlyContinue | ? { $_.OwningProcess -ne "+strconv.Itoa(os.Getpid())+" } | % { Stop-Process -Id $_.OwningProcess -Force }")
-	unregisterUninstall()
 }
 
 func removeProgram(dir string) {
@@ -155,3 +159,26 @@ func Installed() bool { return platform.Run("schtasks", "/Query", "/TN", paths.S
 
 // RecoveryHint is where people find the emergency recovery tool.
 const RecoveryHint = "Start Menu, Regimen, Regimen Emergency Recovery"
+
+// What the agent registered before the rename from FocusGateway (up to v1.2.0).
+const legacyUninstallKey = `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\FocusGateway`
+
+func legacyStartMenuDir() string { return filepath.Join(filepath.Dir(startMenuDir()), "FocusGateway") }
+
+// LegacyInstalled reports whether an old FocusGateway agent is registered.
+func LegacyInstalled() bool {
+	return platform.Run("schtasks", "/Query", "/TN", paths.LegacyServiceName) == nil
+}
+
+// RemoveLegacy stops and deletes an old FocusGateway task, its Start Menu
+// folder, its Apps & Features entry and its program folder (with the old
+// uninstaller, which would otherwise point at files that are gone). Its data
+// folder is moved separately (paths.MigrateLegacyData).
+func RemoveLegacy() {
+	_ = platform.Run("schtasks", "/End", "/TN", paths.LegacyServiceName)
+	_ = platform.Run("schtasks", "/Delete", "/TN", paths.LegacyServiceName, "/F")
+	stopPortListeners() // the old binary must exit before its folder can go
+	_ = os.RemoveAll(legacyStartMenuDir())
+	_ = platform.Run("reg", "delete", legacyUninstallKey, "/f")
+	removeProgram(paths.LegacyProgramDir())
+}

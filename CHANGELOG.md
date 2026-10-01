@@ -4,6 +4,20 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+FocusGateway is now **Regimen**. The website moved to https://aryanmotiani.github.io/regimen/ and the repository to https://github.com/AryanMotiani/regimen.
+
+### Fixed
+
+- Updating from FocusGateway keeps everything. The website copies data saved under the old `focusgateway:*` browser keys to the new names on first load, the extension moves its old `fg_*` storage to `r_*` (PIN, rules, tasks and the lock agent pairing), and the lock agent installer finds an old FocusGateway agent, removes its service and moves its data folder over, so it stays paired and a running no-failsafe block keeps running. Old hosts file entries and policy backups are still recognised, so nothing stale is left behind.
+- The Linux `install.sh` and the macOS package's postinstall script work again (the rename had put an invisible byte before `#!/bin/sh`).
+- Backups exported by FocusGateway import as before.
+
+### Changed
+
+- The `regimen-agent` `.deb`, `.rpm` and AUR packages replace the old `focusgateway-agent` packages.
+- A new README, and new docs: [ARCHITECTURE.md](docs/ARCHITECTURE.md), [DEPLOYMENT.md](docs/DEPLOYMENT.md), [RELEASING.md](docs/RELEASING.md) and [ROADMAP.md](docs/ROADMAP.md). The Netlify and Vercel configs moved to `docs/deploy/` as optional examples, GitHub Pages is the supported host.
+- Internal notes, specs and design screenshots left the public repository (they now live in a git-ignored `private/` folder).
+
 ## [1.2.0] - 2026-09-26
 
 The extension now opens the current app, and what you have already seen follows you between the website and the extension.

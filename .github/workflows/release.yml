@@ -1,6 +1,6 @@
 name: Release
 
-# Push a tag like v1.2.0 (see docs/MAINTAINER_SETUP.md, "Release flow").
+# Push a tag like v1.2.0 (see docs/RELEASING.md, "Release checklist").
 on:
   push:
     tags: ['v*.*.*']
@@ -120,7 +120,7 @@ jobs:
             release/regimen-source-*.zip
 
   # Optional store publishing. Each job only runs when its secrets exist, so forks
-  # and new repos are not affected. See docs/MAINTAINER_SETUP.md, "Browser stores".
+  # and new repos are not affected. See docs/RELEASING.md, "Browser stores".
   chrome-web-store:
     needs: publish
     runs-on: ubuntu-latest

@@ -35,7 +35,9 @@ export const bundledUrl = (route = '/') => ext.runtime.getURL('app/index.html#' 
 
 export async function prefersOffline() {
   try {
-    return !!(await ext.storage.local.get(OFFLINE_KEY))[OFFLINE_KEY]
+    // 'fg_offline_app' is the FocusGateway name, read until the background has moved it
+    const got = await ext.storage.local.get([OFFLINE_KEY, 'fg_offline_app'])
+    return !!(got[OFFLINE_KEY] ?? got.fg_offline_app)
   } catch {
     return false
   }

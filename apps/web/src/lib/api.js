@@ -3,6 +3,8 @@
 //  bridge     a hosted copy of the app, extension installed, origin approved by the user
 //  local      no extension: the Backend runs in this page, data in localStorage
 //             (tasks, habits and the study room work; blocking needs the extension)
+// First: copies data saved under the old FocusGateway keys before anything reads storage.
+import './legacy.js'
 import { createBackend, toErrorPayload } from '@regimen/core'
 
 const ext = globalThis.browser ?? globalThis.chrome

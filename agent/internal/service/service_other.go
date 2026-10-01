@@ -82,3 +82,39 @@ func Installed() bool {
 
 // RecoveryHint is where people find the emergency recovery tool.
 const RecoveryHint = "sudo regimen-agent recover"
+
+// What the agent registered before the rename from FocusGateway (up to v1.2.0).
+const (
+	legacyUnit        = "/etc/systemd/system/focusgateway-agent.service"
+	legacyCliLink     = "/usr/local/bin/focusgateway-agent"
+	legacyDesktopFile = "/usr/share/applications/focusgateway-recovery.desktop"
+)
+
+// LegacyInstalled reports whether an old FocusGateway agent is registered.
+func LegacyInstalled() bool {
+	_, err := os.Stat(legacyUnit)
+	return err == nil
+}
+
+// packageOwned reports whether dpkg or rpm owns path. A package's own removal
+// scripts expect its files, so those stay until the package goes (the new
+// .deb and .rpm replace the old package by themselves).
+func packageOwned(path string) bool {
+	return platform.Run("dpkg-query", "-S", path) == nil || platform.Run("rpm", "-qf", path) == nil
+}
+
+// RemoveLegacy stops and removes an old FocusGateway service and its helpers.
+// Its data folder is moved separately (paths.MigrateLegacyData).
+func RemoveLegacy() {
+	_ = platform.Run("systemctl", "disable", "--now", "focusgateway-agent.service")
+	_ = os.Remove(legacyUnit)
+	_ = platform.Run("systemctl", "daemon-reload")
+	if t, err := os.Readlink(legacyCliLink); err == nil && filepath.Base(t) == paths.LegacyBinaryName() {
+		_ = os.Remove(legacyCliLink)
+	}
+	_ = os.Remove(legacyDesktopFile)
+	dir := paths.LegacyProgramDir()
+	if !packageOwned(filepath.Join(dir, paths.LegacyBinaryName())) {
+		_ = os.RemoveAll(dir)
+	}
+}

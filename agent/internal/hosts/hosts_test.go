@@ -156,3 +156,28 @@ func TestReplaceSwapsALinkInsteadOfWritingThroughIt(t *testing.T) {
 		t.Fatal("the link is replaced by a regular file")
 	}
 }
+
+// A block written by the agent before the rename to Regimen (FocusGateway, up to v1.2.0).
+const legacyBlock = "\n# >>> FOCUSGATEWAY-MANAGED-START (do not edit; run `focusgateway-agent recover` if stuck)\n" +
+	"0.0.0.0 old.com\n:: old.com\n0.0.0.0 www.old.com\n:: www.old.com\n# <<< FOCUSGATEWAY-MANAGED-END\n"
+
+func TestLegacyFocusGatewayBlockIsReplacedAndRemoved(t *testing.T) {
+	upgraded := strings.TrimRight(original, "\n") + "\n" + legacyBlock
+	if got := ManagedDomains(upgraded); !reflect.DeepEqual(got, []string{"old.com", "www.old.com"}) {
+		t.Fatalf("the old block counts as ours, got %v", got)
+	}
+	out := Render(upgraded, []string{"new.com"}, "\n")
+	if strings.Contains(out, "FOCUSGATEWAY") || strings.Contains(out, "old.com") {
+		t.Fatalf("an upgrade must drop the old block, got\n%s", out)
+	}
+	if strings.Count(out, MarkerStart) != 1 || !strings.Contains(out, "0.0.0.0 new.com") {
+		t.Fatalf("exactly one new block expected, got\n%s", out)
+	}
+	if Render(upgraded, nil, "\n") != original {
+		t.Fatal("recover and uninstall must clean an old block too")
+	}
+	both := Render(upgraded, []string{"new.com"}, "\n") + legacyBlock
+	if Render(both, nil, "\n") != original {
+		t.Fatal("old and new blocks together are both removed")
+	}
+}
