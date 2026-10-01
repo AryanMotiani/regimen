@@ -341,7 +341,7 @@ export const ROOM_TIPS = {
   focus:
     'Pick a length or a preset, choose the sites to block and press Start focus. Sites stay blocked for the whole session, and every finished session earns XP and coins.',
   player:
-    'Press play for lofi radio made right in your browser, skip ahead or pick a track. The ambience sliders mix in rain, cafe or fire sounds.',
+    'Press play for lofi radio made right in your browser, skip ahead or pick a track. Rain and a fireplace are there too, off until you switch them on.',
   drawer: 'Your tasks, habits, active blocks and progress in tabs, without leaving the room. Keys T, H, B and S switch tabs.',
   notes: 'Jot down whatever pops into your head so it does not pull you out of focus. Notes stay on this device.',
   scene: 'Change the view outside the window and the style of music. More scenes and styles come from the shop and from leveling up.',

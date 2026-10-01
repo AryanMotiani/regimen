@@ -1,27 +1,29 @@
 import { reactive } from 'vue'
-import { TRACKS, trackById, tracksForStyle, firstTrack, trackStyle, voiceTrack, trackIsMinor, TRACK_KEYS } from '@regimen/core'
+import {
+  TRACKS,
+  trackById,
+  tracksForStyle,
+  firstTrack,
+  trackStyle,
+  voiceTrack,
+  trackIsMinor,
+  TRACK_KEYS,
+  LOFI_MIX_KEYS,
+  sanitizeLofi,
+} from '@regimen/core'
+import { createAmbience, seeded } from './ambience.js'
 // Generative lofi + ambience, synthesized live with the Web Audio API.
 // No audio files, no streaming, no copyright issues, and it keeps playing even
 // when YouTube or Spotify are blocked.
 // Music comes as named tracks (packages/core/src/tracks.js): each sets the key, chords,
 // tempo and a seeded melody, and the radio moves on to the next one after 2 to 4 minutes.
+// Ambience (rain, fireplace, see ambience.js) is separate: off by default, each sound with
+// its own switch and level, and it plays with or without the music.
 
 const NOTE = (n) => 440 * Math.pow(2, (n - 69) / 12) // MIDI -> Hz
 
 const PENTA_MAJOR = [0, 2, 4, 7, 9, 12, 14, 16]
 const PENTA_MINOR = [0, 3, 5, 7, 10, 12, 15, 17]
-
-/** Small seeded random numbers, so a track's melody and groove are the same every time. */
-function seeded(seed) {
-  let a = seed >>> 0
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0
-    let t = a
-    t = Math.imul(t ^ (t >>> 15), t | 1)
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
 
 // A near silent looping audio element. Browsers only show media keys and lock screen
 // controls for media elements, not for Web Audio, so this carries the track name there.
@@ -51,7 +53,7 @@ function silentLoop() {
   return keepAlive
 }
 
-function makeNoise(ctx, kind, seconds = 3) {
+export function makeNoise(ctx, kind, seconds = 3) {
   const len = ctx.sampleRate * seconds
   const buf = ctx.createBuffer(2, len, ctx.sampleRate)
   for (let c = 0; c < 2; c++) {
@@ -103,7 +105,10 @@ export function createLofi() {
   let playing = false
   let musicOn = true
   let volume = 0.6
-  let mix = { rain: 0.5, cafe: 0, fire: 0, noise: 0 }
+  // ambience levels, and which sounds are on (settings.lofi.mix and .ambience in core)
+  let mix = { rain: 0.5, fire: 0.5 }
+  let ambienceOn = { rain: false, fire: false }
+  let ambience = null
   const listeners = new Set()
 
   // sequencer state. The music style sets the groove, the track sets key, chords, tempo
@@ -173,8 +178,6 @@ export function createLofi() {
     tape.connect(reverb)
 
     const white = makeNoise(ctx, 'white')
-    const pink = makeNoise(ctx, 'pink')
-    const brown = makeNoise(ctx, 'brown')
 
     // vinyl crackle: sparse clicks on the music bus
     const crackle = ctx.createBufferSource()
@@ -188,66 +191,15 @@ export function createLofi() {
     crackle.connect(crackleGain).connect(music)
     crackle.start()
 
-    const loop = (buf, rate = 1) => {
-      const s = ctx.createBufferSource()
-      s.buffer = buf
-      s.loop = true
-      s.playbackRate.value = rate
-      s.start(0, Math.random() * 2)
-      return s
-    }
-    const bed = (name, chain) => {
-      const g = ctx.createGain()
-      g.gain.value = 0
-      chain.connect(g).connect(master)
-      return g
-    }
-
-    // Rain: pink noise, band-limited, plus a softer high "sheen"
-    const rainSrc = loop(pink)
-    const rainLp = ctx.createBiquadFilter()
-    rainLp.type = 'lowpass'
-    rainLp.frequency.value = 5200
-    const rainHp = ctx.createBiquadFilter()
-    rainHp.type = 'highpass'
-    rainHp.frequency.value = 350
-    rainSrc.connect(rainHp).connect(rainLp)
-    const rain = bed('rain', rainLp)
-
-    // Cafe: low murmur (brown noise band-passed around voice range)
-    const cafeSrc = loop(brown, 1.1)
-    const cafeBp = ctx.createBiquadFilter()
-    cafeBp.type = 'bandpass'
-    cafeBp.frequency.value = 450
-    cafeBp.Q.value = 0.7
-    cafeSrc.connect(cafeBp)
-    const cafe = bed('cafe', cafeBp)
-
-    // Fire: deep brown rumble, crackle pops are scheduled in the loop
-    const fireSrc = loop(brown, 0.6)
-    const fireLp = ctx.createBiquadFilter()
-    fireLp.type = 'lowpass'
-    fireLp.frequency.value = 900
-    fireSrc.connect(fireLp)
-    const fire = bed('fire', fireLp)
-
-    // Plain focus noise (brown)
-    const noiseSrc = loop(brown)
-    const noiseLp = ctx.createBiquadFilter()
-    noiseLp.type = 'lowpass'
-    noiseLp.frequency.value = 600
-    noiseSrc.connect(noiseLp)
-    const noise = bed('noise', noiseLp)
-
-    nodes = { master, music, reverb, white, beds: { rain, cafe, fire, noise } }
+    // ambience goes straight to the master, beside the music bus (not through its tape filter)
+    ambience = createAmbience(ctx, master, { pink: makeNoise(ctx, 'pink', 6), brown: makeNoise(ctx, 'brown', 6) })
+    nodes = { master, music, reverb, white }
     applyMix()
   }
 
   function applyMix() {
-    if (!nodes) return
-    const t = ctx.currentTime
-    const scale = { rain: 0.7, cafe: 0.9, fire: 1.1, noise: 0.8 }
-    for (const k of Object.keys(nodes.beds)) nodes.beds[k].gain.setTargetAtTime((mix[k] || 0) * scale[k], t, 0.4)
+    if (!ambience) return
+    for (const k of LOFI_MIX_KEYS) ambience.set(k, !!ambienceOn[k], mix[k] ?? 0)
   }
 
   // --- instruments ---
@@ -317,21 +269,6 @@ export function createLofi() {
     s.connect(f).connect(g).connect(nodes.music)
     s.start(time, Math.random())
     s.stop(time + decay + 0.02)
-  }
-
-  function firePop(time) {
-    const s = ctx.createBufferSource()
-    s.buffer = nodes.white
-    const f = ctx.createBiquadFilter()
-    f.type = 'highpass'
-    f.frequency.value = 1500 + Math.random() * 3000
-    const g = ctx.createGain()
-    const v = 0.25 * (mix.fire || 0)
-    g.gain.setValueAtTime(v, time)
-    g.gain.exponentialRampToValueAtTime(0.0001, time + 0.03 + Math.random() * 0.05)
-    s.connect(f).connect(g).connect(nodes.master)
-    s.start(time, Math.random() * 2)
-    s.stop(time + 0.1)
   }
 
   function drums(s16, t) {
@@ -433,7 +370,6 @@ export function createLofi() {
         }
       }
     }
-    if (mix.fire > 0 && Math.random() < 0.18) firePop(t + Math.random() * step)
     if (s16 % 4 === 0) {
       listeners.forEach((cb) => cb({ step: s16, bar }))
       lofiState.position = Math.max(0, Math.round(time - trackStart))
@@ -444,11 +380,13 @@ export function createLofi() {
     const ms = typeof navigator !== 'undefined' && navigator.mediaSession
     if (!ms || typeof window.MediaMetadata === 'undefined') return
     try {
-      ms.metadata = new window.MediaMetadata({
-        title: track.name,
-        artist: 'Regimen Radio',
-        album: trackStyle(track)?.name || 'Lofi',
-      })
+      // ambience alone: name the sounds instead of a track nobody hears
+      const sounds = LOFI_MIX_KEYS.filter((k) => ambienceOn[k]).map((k) => AMBIENCE_NAMES[k])
+      ms.metadata = new window.MediaMetadata(
+        musicOn || !sounds.length
+          ? { title: track.name, artist: 'Regimen Radio', album: trackStyle(track)?.name || 'Lofi' }
+          : { title: sounds.join(' and '), artist: 'Regimen Radio', album: 'Ambience' },
+      )
       ms.playbackState = playing ? 'playing' : 'paused'
     } catch {}
   }
@@ -512,12 +450,24 @@ export function createLofi() {
       if (ctx && playing) nodes.master.gain.setTargetAtTime(v, ctx.currentTime, 0.1)
     },
     setMusic(on) {
-      musicOn = on
-      if (ctx) nodes.music.gain.setTargetAtTime(on ? 0.9 : 0, ctx.currentTime, 0.2)
+      musicOn = !!on
+      lofiState.music = musicOn
+      if (ctx) {
+        nodes.music.gain.cancelScheduledValues(ctx.currentTime)
+        nodes.music.gain.setTargetAtTime(musicOn ? 0.9 : 0, ctx.currentTime, 0.2)
+      }
+      updateSession()
     },
+    /** Ambience levels, 0 to 1 per sound. Sounds that no longer exist are ignored. */
     setMix(m) {
-      mix = { ...mix, ...m }
+      for (const k of LOFI_MIX_KEYS) if (typeof m?.[k] === 'number') mix[k] = m[k]
       applyMix()
+    },
+    /** Which ambience sounds are on, for example { rain: true }. */
+    setAmbience(a) {
+      for (const k of LOFI_MIX_KEYS) if (typeof a?.[k] === 'boolean') ambienceOn[k] = a[k]
+      applyMix()
+      updateSession()
     },
     onBeat(cb) {
       listeners.add(cb)
@@ -599,6 +549,7 @@ export const lofiState = reactive({
   position: 0, // seconds into the track, updated every beat
   shuffle: false,
   repeatOne: false,
+  music: true, // the radio is part of what plays (off: ambience alone)
   chosen: false, // a track was picked or played in this session (before that, show the saved one)
 })
 
@@ -609,12 +560,18 @@ export function savedTrack(settings = {}) {
   return t && (!l.style || t.style === l.style) ? t : firstTrack(l.style || 'music-classic')
 }
 
-/** Start with the user's saved room settings (volume, ambience mix, style). */
+/** Display names of the ambience sounds. */
+export const AMBIENCE_NAMES = { rain: 'Rain', fire: 'Fireplace' }
+
+/** Start with the user's saved room settings (volume, music on or off, ambience, style). */
 export async function playWithSettings(settings = {}) {
   const p = lofi()
-  const l = settings.lofi || {}
-  p.setVolume(l.volume ?? 0.6)
-  p.setMix(l.mix || { rain: 0.5 })
+  // sanitizeLofi also reads settings saved by an older extension (no ambience switches yet)
+  const l = sanitizeLofi(settings.lofi)
+  p.setVolume(l.volume)
+  p.setMusic(l.music)
+  p.setMix(l.mix)
+  p.setAmbience(l.ambience)
   if (!p.playing) p.setTrack(savedTrack(settings).id)
   await p.start()
 }

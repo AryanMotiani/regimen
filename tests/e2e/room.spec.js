@@ -195,6 +195,44 @@ test('on phones the room windows stack and open full screen', async ({ page }) =
   await expect(player).toBeVisible()
 })
 
+test('music plays alone by default, ambience has its own switches and they are remembered', async ({ page }) => {
+  // a room saved by an older version with the old default ambience (rain at 0.5): it goes quiet
+  const state = JSON.parse(await setUpUser())
+  state.settings.lofi = {
+    volume: 0.6,
+    scene: 'scene-night',
+    style: 'music-classic',
+    objects: true,
+    mix: { rain: 0.5, cafe: 0, fire: 0, noise: 0 },
+  }
+  await page.addInitScript((s) => {
+    localStorage.setItem('regimen:tours-seen', '["room"]')
+    if (!localStorage.getItem('regimen:v1')) localStorage.setItem('regimen:v1', s)
+  }, JSON.stringify(state))
+  await page.goto(APP + '#/room')
+  const player = page.locator('[data-window="player"]')
+  await page.locator('[data-dock="player"]').click()
+  const music = player.getByRole('button', { name: /^Music/ }).first()
+  const rain = player.locator('[data-ambience="rain"]').first()
+  const fire = player.locator('[data-ambience="fire"]').first()
+  await expect(music).toHaveAttribute('aria-pressed', 'true')
+  await expect(rain).toHaveAttribute('aria-pressed', 'false')
+  await expect(fire).toHaveAttribute('aria-pressed', 'false')
+  // ambience alone: fireplace on, music off
+  await fire.click()
+  await music.click()
+  await expect(fire).toHaveAttribute('aria-pressed', 'true')
+  await expect(music).toHaveAttribute('aria-pressed', 'false')
+  await expect
+    .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('regimen:v1')).settings.lofi))
+    .toMatchObject({ music: false, ambience: { rain: false, fire: true } })
+  await page.reload()
+  await page.waitForTimeout(500)
+  if (!(await player.isVisible())) await page.locator('[data-dock="player"]').click()
+  await expect(player.locator('[data-ambience="fire"]').first()).toHaveAttribute('aria-pressed', 'true')
+  await expect(player.getByRole('button', { name: /^Music/ }).first()).toHaveAttribute('aria-pressed', 'false')
+})
+
 /** A finished setup in this browser's local storage. */
 async function setUpUser() {
   let saved = null

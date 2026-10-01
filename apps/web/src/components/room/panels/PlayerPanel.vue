@@ -1,13 +1,15 @@
 <script setup>
-// The music window: what is playing, the controls, the ambience mixer and the track list.
-// It grows into its space: small shows the essentials with the track list and ambience in a
-// popover, taller shows the ambience inline, big shows the track list inline too.
+// The music window: what is playing, the controls, music and ambience switches and the
+// track list. It grows into its space: small shows the essentials and a row of sound
+// switches (levels and the track list in a popover), taller shows the ambience levels
+// inline, big shows the track list inline too.
 import { computed, nextTick, onBeforeUnmount, ref } from 'vue'
 import { trackById, trackStyle } from '@regimen/core'
 import { lofi, lofiState } from '../../../lib/lofi.js'
 import RoomIcon from '../RoomIcon.vue'
 import EqBars from './EqBars.vue'
 import TrackList from './TrackList.vue'
+import AmbienceMixer from './AmbienceMixer.vue'
 
 const props = defineProps({
   w: { type: Number, default: 360 },
@@ -21,16 +23,10 @@ const player = lofi()
 // the room's sound settings: a reactive object owned by Room.vue, changed right here
 const sound = props.ui
 
-const AMBI = [
-  { key: 'rain', label: 'Rain', icon: 'rain' },
-  { key: 'cafe', label: 'Café', icon: 'coffee' },
-  { key: 'fire', label: 'Fire', icon: 'flame' },
-  { key: 'noise', label: 'Brown noise', icon: 'wave' },
-]
 const track = computed(() => trackById(lofiState.track))
 const styleName = computed(() => trackStyle(track.value)?.name || 'Lofi')
 const natural = computed(() => !props.h)
-const inlineAmbience = computed(() => (natural.value ? true : props.h >= 250))
+const inlineAmbience = computed(() => (natural.value ? true : props.h >= 310))
 const inlineList = computed(() => (natural.value ? props.max : props.h >= 390 && props.w >= 320))
 const wide = computed(() => props.w >= 440)
 const mmss = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`
@@ -160,29 +156,11 @@ const on = '!bg-(--fg-room-hover) !text-accent'
       </button>
     </div>
 
-    <!-- ambience -->
+    <!-- music and ambience: switches always in view, levels when there is room -->
     <div v-if="inlineAmbience" class="room-well p-2.5">
-      <div class="mb-2 flex items-center justify-between">
-        <p class="hud-label text-muted">Ambience</p>
-        <label class="flex items-center gap-1.5 text-[11px] text-muted"
-          ><input v-model="sound.music" type="checkbox" class="room-range" /> Music</label
-        >
-      </div>
-      <div class="grid gap-x-4 gap-y-2" :class="w >= 300 ? 'grid-cols-2' : 'grid-cols-1'">
-        <label v-for="a in AMBI" :key="a.key" class="flex items-center gap-2 text-muted" :title="a.label">
-          <RoomIcon :name="a.icon" :size="14" />
-          <input
-            v-model.number="sound.mix[a.key]"
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            class="room-range w-full min-w-0"
-            :aria-label="a.label + ' volume'"
-          />
-        </label>
-      </div>
+      <AmbienceMixer :ui="sound" />
     </div>
+    <AmbienceMixer v-else :ui="sound" compact />
 
     <!-- the track list, inline when there is room -->
     <div v-if="inlineList" class="-mx-2 min-h-0 flex-1 overflow-y-auto border-t border-line px-1 pt-2">
@@ -212,26 +190,7 @@ const on = '!bg-(--fg-room-hover) !text-accent'
           <TrackList :current="lofiState.track" :level="level" :playing="lofiState.playing" @choose="choose" />
         </div>
         <div v-if="!inlineAmbience" class="border-t border-line p-3">
-          <div class="mb-2 flex items-center justify-between">
-            <p class="hud-label text-muted">Ambience</p>
-            <label class="flex items-center gap-1.5 text-[11px] text-muted"
-              ><input v-model="sound.music" type="checkbox" class="room-range" /> Music</label
-            >
-          </div>
-          <div class="grid grid-cols-2 gap-x-4 gap-y-2">
-            <label v-for="a in AMBI" :key="a.key" class="flex items-center gap-2 text-muted" :title="a.label">
-              <RoomIcon :name="a.icon" :size="14" />
-              <input
-                v-model.number="sound.mix[a.key]"
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                class="room-range w-full min-w-0"
-                :aria-label="a.label + ' volume'"
-              />
-            </label>
-          </div>
+          <AmbienceMixer :ui="sound" />
         </div>
       </div>
     </Teleport>

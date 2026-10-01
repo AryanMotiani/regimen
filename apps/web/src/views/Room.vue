@@ -11,7 +11,7 @@
 // Keys: Space play, F full screen, C scene, D decorate, N scratchpad, Z hide panels,
 // T H B S planner tabs, Esc restores a maximized window.
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
-import { UNLOCKS, trackOwned, trackById } from '@regimen/core'
+import { UNLOCKS, trackOwned, trackById, sanitizeLofi } from '@regimen/core'
 import { store, call, sessionRunning } from '../lib/store.js'
 import { lofi, lofiState, playWithSettings, savedTrack } from '../lib/lofi.js'
 import { createWindows } from '../lib/windows.js'
@@ -44,7 +44,8 @@ import BlockingWays from '../components/help/BlockingWays.vue'
 import { useRouter } from 'vue-router'
 
 const player = lofi()
-const saved = store.state?.settings?.lofi || {}
+// sanitizeLofi: settings from an older extension have no music or ambience switches yet
+const saved = sanitizeLofi(store.state?.settings?.lofi)
 const LEGACY = { night: 'scene-night', sunset: 'scene-sunset', morning: 'scene-morning' }
 const level = computed(() => progress.value?.level || 1)
 // scenes and music styles are owned (free or bought in the shop, see core economy.js)
@@ -52,11 +53,13 @@ const has = (id) => ownsItem(id)
 const onboarded = computed(() => !!store.state?.onboarding?.completed)
 
 const ui = reactive({
-  music: true,
-  volume: saved.volume ?? 0.6,
-  scene: LEGACY[saved.scene] || saved.scene || 'scene-night',
-  style: saved.style || 'music-classic',
-  mix: { rain: 0.5, cafe: 0, fire: 0, noise: 0, ...(saved.mix || {}) },
+  music: saved.music,
+  volume: saved.volume,
+  scene: LEGACY[saved.scene] || saved.scene,
+  style: saved.style,
+  // ambience: each sound on or off, mix: its level when on
+  ambience: { ...saved.ambience },
+  mix: { ...saved.mix },
 })
 // never show something that is not owned (for example after importing old data)
 if (!has(ui.scene)) ui.scene = 'scene-night'
@@ -106,7 +109,7 @@ const NAV = [
 const ALL_WINDOWS = [
   { id: 'status', title: 'Status', short: 'Status', icon: 'pulse', min: [300, 84], max: [1200, 220], onboarded: true },
   { id: 'focus', title: 'Focus', short: 'Focus', icon: 'clock', min: [250, 150], max: [1100, 1000] },
-  { id: 'player', title: 'Music', short: 'Music', icon: 'headphones', min: [270, 176], max: [800, 1100] },
+  { id: 'player', title: 'Music', short: 'Music', icon: 'headphones', min: [270, 216], max: [800, 1100] },
   { id: 'drawer', title: 'Planner', short: 'Planner', icon: 'list', min: [280, 200], max: [1100, 1600], onboarded: true },
   { id: 'notes', title: 'Scratchpad', short: 'Notes', icon: 'notes', min: [220, 140], max: [1000, 1000] },
   { id: 'scene', title: 'Scene and music', short: 'Scene', icon: 'sparkles', min: [300, 220], max: [680, 1000] },
@@ -129,7 +132,7 @@ function openLayout(vw, vh) {
   const wide = vw >= 1180
   const big = vw >= 1600 && vh >= 960
   const lw = big ? 400 : 360 // the left column
-  const pH = big ? 300 : 184
+  const pH = big ? 340 : 224
   // on narrower screens the dock would sit on the bottom windows, so they stay above it
   const bottom = vh - (vw >= 1180 ? M : 64)
   const player = { x: M, y: bottom - pH, w: lw, h: pH }
@@ -208,9 +211,16 @@ watch(decorating, (v) => (v ? offerTip('decorate') : tipFor.value === 'decorate'
 // --- sound ---
 async function toggle() {
   if (player.playing) return player.stop()
-  await playWithSettings({ lofi: { volume: ui.volume, mix: { ...ui.mix }, style: ui.style, track: lofiState.track } })
-  player.setMusic(ui.music)
+  await playWithSettings({ lofi: soundSettings() })
 }
+const soundSettings = () => ({
+  volume: ui.volume,
+  music: ui.music,
+  mix: { ...ui.mix },
+  ambience: { ...ui.ambience },
+  style: ui.style,
+  track: lofiState.track,
+})
 function choose(t) {
   if (!trackOwned(t.id, ownsItem)) return
   player.setTrack(t.id)
@@ -244,18 +254,38 @@ watch(
   (m) => player.setMix(m),
   { deep: true },
 )
+watch(
+  () => ({ ...ui.ambience }),
+  (a) => player.setAmbience(a),
+  { deep: true },
+)
+// the rain on the window: the usual drizzle, heavier when the rain sound is turned up
+const rainView = computed(() => Math.max(0.5, ui.ambience.rain ? ui.mix.rain : 0))
 
 let saveT = null
 watch(
-  () => [ui.volume, ui.scene, ui.style, lofiState.track, { ...ui.mix }],
+  () => [ui.volume, ui.music, ui.scene, ui.style, lofiState.track, { ...ui.mix }, { ...ui.ambience }],
   () => {
     if (!store.state) return
     clearTimeout(saveT)
     saveT = setTimeout(() => {
-      const lofiPatch = { volume: ui.volume, scene: ui.scene, style: ui.style, mix: { ...ui.mix } }
+      const lofiPatch = {
+        volume: ui.volume,
+        scene: ui.scene,
+        style: ui.style,
+        music: ui.music,
+        mix: { ...ui.mix },
+        ambience: { ...ui.ambience },
+      }
       const t = trackById(lofiState.track)
       if (t && t.style === ui.style && trackOwned(t.id, ownsItem)) lofiPatch.track = t.id
-      call('settings.update', { patch: { lofi: lofiPatch } }).catch(() => {})
+      call('settings.update', { patch: { lofi: lofiPatch } }).catch(() => {
+        // an older extension does not know the music and ambience switches yet: save what
+        // it understands, a sound that is off as level 0
+        const { music, ambience, ...rest } = lofiPatch
+        const mix = Object.fromEntries(Object.entries(rest.mix).map(([k, v]) => [k, ambience[k] ? v : 0]))
+        call('settings.update', { patch: { lofi: { ...rest, mix } } }).catch(() => {})
+      })
     }, 800)
   },
   { deep: true },
@@ -388,7 +418,7 @@ const chipOn = 'room-glass room-pill room-on'
           : 'bottom-0'
       "
       :scene="ui.scene"
-      :rain="ui.mix.rain"
+      :rain="rainView"
       :fit="decorating ? 'contain' : 'cover'"
       :editable="decorating"
     />
@@ -397,7 +427,7 @@ const chipOn = 'room-glass room-pill room-on'
         ref="roomEl"
         :style="{ width: Math.round((heroH * 16) / 9) + 'px', height: heroH + 'px' }"
         :scene="ui.scene"
-        :rain="ui.mix.rain"
+        :rain="rainView"
         :editable="decorating"
       />
     </div>

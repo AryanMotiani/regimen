@@ -48,7 +48,19 @@ export async function refresh() {
   }
 }
 
+let markBooted
+/** Settles once init() has finished (or failed): the state is in, or never will be. */
+export const booted = new Promise((resolve) => (markBooted = resolve))
+
 export async function init() {
+  try {
+    await start()
+  } finally {
+    markBooted()
+  }
+}
+
+async function start() {
   adapter = await connect()
   store.mode = adapter.mode
   if (adapter.hostAccess != null) store.health.hostAccess = adapter.hostAccess

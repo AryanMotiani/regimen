@@ -22,6 +22,7 @@ import { startRewardWatch, isGame } from './lib/rewards.js'
 import { startSeenSync } from './lib/seen.js'
 import { lofiState } from './lib/lofi.js'
 import { freshAffordable } from './lib/shop.js'
+import { notSetUpRoute } from './router.js'
 
 const route = useRoute()
 const menu = ref(false)
@@ -37,6 +38,20 @@ watchEffect(() => {
   // .dark picks the theme's dark variant (settings.colorMode), so text and surfaces
   // always come from the same variant
   root.classList.toggle('dark', isDark.value)
+})
+// What this page looked like, for public/boot.js to paint the next visit's first frame with
+// and for main.js to fetch the right first screen early.
+watchEffect(() => {
+  const boot = {
+    theme: activeTheme.value.id,
+    mode: lookMode.value,
+    dark: isDark.value,
+    // the front door (#/) leads to the landing page (router.js)
+    home: !store.pendingApproval && notSetUpRoute() === '/home',
+  }
+  try {
+    localStorage.setItem('regimen:boot', JSON.stringify(boot))
+  } catch {}
 })
 startRewardWatch()
 startSeenSync()
@@ -81,7 +96,8 @@ const showRail = computed(() => !['/today', '/tasks', '/habits'].includes(route.
 
   <template v-else>
     <RouterView v-if="route.meta.bare" />
-    <div v-else class="min-h-screen lg:flex">
+    <!-- matched is empty only before the first route resolves (main.js mounts after it) -->
+    <div v-else-if="route.matched.length" class="min-h-screen lg:flex">
       <!-- sidebar -->
       <aside class="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-line px-4 py-5 lg:flex">
         <RouterLink to="/" class="mb-6 flex items-center gap-2.5 px-2">

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { createBackend } from '../src/backend.js'
 import { migrate } from '../src/state.js'
 import { UNLOCKS } from '../src/unlocks.js'
-import { sanitizeLofi, mergeLofi } from '../src/lofi.js'
+import { sanitizeLofi, mergeLofi, DEFAULT_LOFI } from '../src/lofi.js'
 import { trackOwned } from '../src/economy.js'
 import {
   TRACKS,
@@ -126,5 +126,54 @@ describe('settings.lofi.track', () => {
     expect(sanitizeLofi({ style: 'music-classic', track: 'nope' }).track).toBeUndefined()
     expect(sanitizeLofi({}).track).toBeUndefined()
     expect(migrate(null).settings.lofi.track).toBeUndefined()
+  })
+})
+
+describe('settings.lofi ambience', () => {
+  it('plays the music alone by default', () => {
+    const l = migrate(null).settings.lofi
+    expect(l.music).toBe(true)
+    expect(l.ambience).toEqual({ rain: false, fire: false })
+    expect(sanitizeLofi({})).toMatchObject({ music: true, ambience: { rain: false, fire: false }, mix: { rain: 0.5, fire: 0.5 } })
+  })
+
+  it('turns the old default rain off once, and keeps a mix someone chose', () => {
+    const old = (mix) => sanitizeLofi({ volume: 0.6, scene: 'scene-night', style: 'music-classic', objects: true, mix })
+    // exactly the old default: never chosen, so it goes quiet
+    expect(old({ rain: 0.5, cafe: 0, fire: 0, noise: 0 })).toMatchObject({ ambience: { rain: false, fire: false }, mix: DEFAULT_LOFI.mix })
+    expect(old({ rain: 0.5 }).ambience).toEqual({ rain: false, fire: false })
+    // changed: the sounds that still exist stay on at their level
+    expect(old({ rain: 0.8, cafe: 0, fire: 0, noise: 0 })).toMatchObject({
+      ambience: { rain: true, fire: false },
+      mix: { rain: 0.8, fire: 0.5 },
+    })
+    expect(old({ rain: 0.5, cafe: 0, fire: 0.3, noise: 0 })).toMatchObject({
+      ambience: { rain: true, fire: true },
+      mix: { rain: 0.5, fire: 0.3 },
+    })
+    expect(old({ rain: 0, cafe: 0, fire: 0, noise: 0 }).ambience).toEqual({ rain: false, fire: false })
+    // only sounds that are gone: nothing left to play
+    expect(old({ rain: 0, cafe: 0.7, fire: 0, noise: 0.4 })).toMatchObject({
+      ambience: { rain: false, fire: false },
+      mix: DEFAULT_LOFI.mix,
+    })
+    // once converted it stays put, the old default level no longer means anything
+    const once = sanitizeLofi(old({ rain: 0.9 }))
+    expect(sanitizeLofi({ ...once, mix: { rain: 0.5, fire: 0.5 } }).ambience).toEqual({ rain: true, fire: false })
+    expect(sanitizeLofi({ ...once, ambience: { rain: false, fire: true } }).ambience).toEqual({ rain: false, fire: true })
+  })
+
+  it('migrates stored state through migrate()', () => {
+    const s = migrate(null)
+    s.settings.lofi = {
+      volume: 0.4,
+      scene: 'scene-night',
+      style: 'music-classic',
+      objects: true,
+      mix: { rain: 0.5, cafe: 0, fire: 0, noise: 0 },
+    }
+    const m = migrate(s)
+    expect(m.settings.lofi).toMatchObject({ volume: 0.4, music: true, ambience: { rain: false, fire: false } })
+    expect('cafe' in m.settings.lofi.mix).toBe(false)
   })
 })

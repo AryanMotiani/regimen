@@ -202,9 +202,18 @@ describe('scene and music locks', () => {
     await expectCode(lofi({ objects: 'yes' }), 'VALIDATION')
     await expectCode(lofi({ hacked: true }), 'VALIDATION')
     await expectCode(lofi('night'), 'VALIDATION')
+    await expectCode(lofi({ ambience: { rain: 1 } }), 'VALIDATION')
+    await expectCode(lofi({ ambience: { cafe: true } }), 'VALIDATION')
+    await expectCode(lofi({ music: 'off' }), 'VALIDATION')
     const r = await lofi({ mix: { fire: 0.4 }, objects: false })
-    expect(r.state.settings.lofi.mix).toEqual({ rain: 0.5, cafe: 0, fire: 0.4, noise: 0 })
+    expect(r.state.settings.lofi.mix).toEqual({ rain: 0.5, fire: 0.4 })
+    expect(r.state.settings.lofi.ambience).toEqual({ rain: false, fire: false })
     expect(r.state.settings.lofi.objects).toBe(false)
+    // an older copy of the app still sends cafe and noise: ignored, the rest saves
+    const old = await lofi({ mix: { rain: 0.3, cafe: 0.2, fire: 0, noise: 0 } })
+    expect(old.state.settings.lofi.mix).toEqual({ rain: 0.3, fire: 0 })
+    const on = await lofi({ music: false, ambience: { fire: true } })
+    expect(on.state.settings.lofi).toMatchObject({ music: false, ambience: { rain: false, fire: true } })
   })
 
   it('keeps a locked scene that is already saved', async () => {
@@ -254,7 +263,10 @@ describe('import sanitizing', () => {
       scene: 'scene-night',
       style: 'music-classic',
       objects: true,
-      mix: { rain: 0.2, cafe: 0, fire: 0, noise: 0 },
+      music: true,
+      // an older export that turned rain down to 0.2: it was chosen, so it stays on
+      mix: { rain: 0.2, fire: 0.5 },
+      ambience: { rain: true, fire: false },
     })
     expect(st.room.avatar.hair).toBe('short')
     expect(st.room.items.map((i) => i.id)).toEqual(['obj-mug'])

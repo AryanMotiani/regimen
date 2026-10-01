@@ -58,7 +58,7 @@ export const HELP = {
         h: 'Windows in the dock',
         items: [
           'Focus: the clock and the focus timer. Start a session and the sites you picked stay blocked until it ends, breaks included.',
-          'Music: lofi radio made in your browser. Play, skip, pick a track, and mix in rain, cafe, fire or noise.',
+          'Music: lofi radio made in your browser. Play, skip or pick a track, and turn on rain or a fireplace if you like.',
           'Planner: your tasks, habits, active blocks and progress in tabs.',
           'Status: level, XP, streak, what is blocked and the timer.',
           'Scratchpad: quick notes that stay on this device.',
@@ -82,7 +82,7 @@ export const HELP = {
         items: [
           'Each music style has a few named tracks. The radio moves on to the next one by itself.',
           'New styles unlock as you level up. Locked ones show the level they need.',
-          'Ambience sliders (rain, cafe, fire, noise) mix in with the music, or play alone with music off.',
+          'Ambience is off until you turn it on: rain and a fireplace, each with its own level. Turn Music off to hear only the ambience.',
         ],
       },
       {

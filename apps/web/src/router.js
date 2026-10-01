@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import { store, blockingIssue, sessionRunning } from './lib/store.js'
+import { store, booted, blockingIssue, sessionRunning } from './lib/store.js'
 import { askYesNo } from './lib/dialogs.js'
 
 // Hash history: works on every static host and inside the extension, no rewrites needed.
@@ -44,17 +44,23 @@ router.beforeEach(async (to, from) => {
   return stay === false
 })
 
-router.beforeEach((to) => {
+/**
+ * Where someone who is not set up yet goes instead of the app: the landing page for a first
+ * visit to the hosted site without the extension, the setup otherwise. null once set up.
+ */
+export function notSetUpRoute() {
+  if (!store.state) return '/home'
+  if (store.state.onboarding.completed) return null
+  return store.mode === 'local' && !store.state.security.hasPin ? '/home' : '/welcome'
+}
+
+router.beforeEach(async (to) => {
   // Older blocked pages link to /?failsafe=… ; the Failsafe flow lives on Today now.
   if (to.path === '/' && to.query.failsafe) return { path: '/today', query: to.query }
   if (to.meta.public) return true
-  if (!store.state) return '/home'
-  if (!store.state.onboarding.completed) {
-    // First visit to the hosted site without the extension: show the landing page.
-    if (store.mode === 'local' && !store.state.security.hasPin) return '/home'
-    return '/welcome'
-  }
-  return true
+  // decide only once the state is in (main.js also waits for it before the first route)
+  if (!store.ready) await booted
+  return notSetUpRoute() || true
 })
 
 router.afterEach((to) => {
