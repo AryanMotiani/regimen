@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with: { node-version-file: .nvmrc, cache: npm }
       - uses: actions/setup-go@v5
         with: { go-version-file: agent/go.mod, cache: false }
@@ -150,7 +150,7 @@ jobs:
         run: echo "addons.mozilla.org secrets not set, skipping."
       - uses: actions/checkout@v7
         if: env.AMO_JWT_ISSUER != ''
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: env.AMO_JWT_ISSUER != ''
         with: { node-version-file: .nvmrc, cache: npm }
       - if: env.AMO_JWT_ISSUER != ''
