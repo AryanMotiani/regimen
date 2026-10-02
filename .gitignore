@@ -16,6 +16,8 @@ coverage
 # Local and private material: notes, plans, design rounds, AI outputs and screenshots.
 # Everything that is not part of the public project goes in private/ (see private/README.md).
 private/
+Claude outputs/
+
 
 # Secrets and editor or OS noise
 .env
